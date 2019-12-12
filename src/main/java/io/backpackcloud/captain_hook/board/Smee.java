@@ -1,0 +1,186 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2019 Marcelo Guimaraes
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+package io.backpackcloud.captain_hook.board;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import io.backpackcloud.captain_hook.core.Address;
+import io.backpackcloud.captain_hook.core.Event;
+import io.backpackcloud.captain_hook.core.LabelSet;
+import io.backpackcloud.captain_hook.core.Notification;
+import io.backpackcloud.captain_hook.core.TemplateEngine;
+import io.backpackcloud.captain_hook.core.UnbelievableException;
+import io.backpackcloud.captain_hook.core.Webhook;
+import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.annotation.Timed;
+import org.jboss.logging.Logger;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * The Captain Hook's best man. Responsible for allowing thing aboard so the crew can handle.
+ */
+@Path("/")
+@ApplicationScoped
+public class Smee {
+
+  private static final Logger logger = Logger.getLogger(Smee.class);
+
+  private final Crew crew;
+
+  private final TemplateEngine templateEngine;
+
+  @Inject
+  public Smee(Crew crew, TemplateEngine templateEngine) {
+    this.crew = crew;
+    this.templateEngine = templateEngine;
+  }
+
+  /**
+   * Passes the given notification to Smee for analysis.
+   * <p>
+   * If the notification is ok, Smee will handle it to the crew for delivering.
+   *
+   * @param notification the notification to handle
+   * @return the operation's response
+   */
+  @POST
+  @Path("/notifications")
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Timed(name = "notificationTimer",
+      unit = MetricUnits.MILLISECONDS,
+      description = "Measure of how long it takes for the crew to be aware of a notification.")
+  public Response process(Notification notification) {
+    logger.infov("Received notification for {0}", notification.destination());
+    crew.handle(notification);
+    return Response.ok().build();
+  }
+
+  /**
+   * Passes the given event to Smee for analysis.
+   * <p>
+   * If the event is ok, Smee will handle it to the crew.
+   *
+   * @param event the event to handle
+   * @return a response containing the list of addresses notified about the given event.
+   */
+  @POST
+  @Path("/events")
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Timed(name = "eventTimer",
+      unit = MetricUnits.MILLISECONDS,
+      description = "Measure of how long it takes for the crew to be aware of an event.")
+  public Response process(Event event) {
+    logger.infov("Received event {0}", event.type());
+
+    Set<Address> addresses = crew.handle(event).stream()
+        .map(Notification::destination)
+        .collect(Collectors.toSet());
+
+    if (addresses.isEmpty()) return Response.noContent().build();
+
+    return Response.ok(addresses).build();
+  }
+
+  /**
+   * Passes the given webhook to Smee for analysis.
+   * <p>
+   * If the webhook is ok, Smee will handle it to the crew.
+   * <p>
+   * The webhook can have a JSON payload, which the Captain prefer, or an XML.
+   * <p>
+   * Be careful if you pass an XML, the Captain might order you to walk the plank.
+   *
+   * @param uriInfo the information about the url
+   * @param headers the http headers
+   * @param payload the webhook's payload (in json or xml - ouch)
+   * @return a response containing the list of events generated by the given webhook
+   */
+  @POST
+  @Path("/webhooks")
+  @Produces(MediaType.APPLICATION_JSON)
+  @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+  @Timed(name = "webhookTimer",
+      unit = MetricUnits.MILLISECONDS,
+      description = "Measure of how long it takes for the crew to be aware of a webhook.")
+  public Response process(@Context UriInfo uriInfo,
+                          @Context HttpHeaders headers,
+                          String payload) {
+    logger.infov("Received webhook");
+    Map<String, ?> payloadData;
+    ObjectMapper objectMapper;
+
+    if (MediaType.APPLICATION_XML_TYPE.equals(headers.getMediaType())) {
+      objectMapper = new XmlMapper();
+    } else {
+      objectMapper = new ObjectMapper();
+    }
+
+    try {
+      JsonNode node = objectMapper.readTree(payload);
+      payloadData = objectMapper.treeToValue(node, Map.class);
+
+      Webhook webhook = new Webhook(extractLabels(uriInfo), payloadData);
+
+      List<Event> events = crew.handle(webhook, templateEngine);
+
+      if (events.isEmpty()) return Response.noContent().build();
+
+      return Response.ok(new HashSet<>(events)).build();
+    } catch (Exception e) {
+      throw new UnbelievableException(e);
+    }
+  }
+
+  private LabelSet extractLabels(UriInfo uriInfo) {
+    Map<String, String> map = new HashMap<>();
+
+    uriInfo.getQueryParameters().entrySet().stream()
+        .filter(entry -> !entry.getValue().isEmpty())
+        .forEach(entry -> map.put(entry.getKey(), entry.getValue().get(0)));
+
+    return LabelSet.of(map);
+  }
+
+}
