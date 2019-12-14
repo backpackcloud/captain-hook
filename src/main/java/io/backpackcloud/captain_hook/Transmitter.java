@@ -22,33 +22,28 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook.core;
+package io.backpackcloud.captain_hook;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.quarkus.runtime.annotations.RegisterForReflection;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import io.backpackcloud.captain_hook.transmitters.http.HTTPTransmitter;
+import io.backpackcloud.captain_hook.transmitters.pushover.PushoverTransmitter;
+import io.backpackcloud.captain_hook.transmitters.slack.SlackTransmitter;
+import io.backpackcloud.captain_hook.transmitters.telegram.TelegramTransmitter;
 
-import java.util.Collections;
-import java.util.List;
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = HTTPTransmitter.class, name = "http"),
+    @JsonSubTypes.Type(value = PushoverTransmitter.class, name = "pushover"),
+    @JsonSubTypes.Type(value = TelegramTransmitter.class, name = "telegram"),
+    @JsonSubTypes.Type(value = SlackTransmitter.class, name = "slack")
+})
+public interface Transmitter {
 
-@RegisterForReflection
-public class VirtualAddress {
+  void fire(Notification notification);
 
-  private final List<Address> addresses;
-
-  @JsonCreator
-  public VirtualAddress(List<Address> addresses) {
-    this.addresses = addresses;
+  default boolean isUp() {
+    return true;
   }
-
-  @JsonCreator
-  public VirtualAddress(Address address) {
-    this(Collections.singletonList(address));
-  }
-
-  public List<Address> addresses() {
-    return addresses;
-  }
-
-  public static final VirtualAddress NULL = new VirtualAddress(Collections.emptyList());
 
 }

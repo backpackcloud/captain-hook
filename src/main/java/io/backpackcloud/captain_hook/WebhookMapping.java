@@ -22,28 +22,37 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook.core;
+package io.backpackcloud.captain_hook;
 
-import java.io.Serializable;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
-public class Webhook implements Serializable {
+import java.util.Optional;
 
-  private final LabelSet labels;
+@RegisterForReflection
+public class WebhookMapping {
 
-  private final Map<String, ?> payload;
+  private final Selector selector;
+  private final Event event;
 
-  public Webhook(LabelSet labels, Map<String, ?> payload) {
-    this.labels = labels;
-    this.payload = payload;
+  @JsonCreator
+  public WebhookMapping(@JsonProperty("selector") Selector selector,
+                        @JsonProperty("event") Event event) {
+    this.selector = Optional.ofNullable(selector).orElseGet(Selector::empty);
+    this.event = event;
   }
 
-  public LabelSet labels() {
-    return labels;
+  public boolean matches(Webhook webhook) {
+    return selector.test(webhook.labels());
   }
 
-  public Map<String, ?> payload() {
-    return this.payload;
+  public Selector selector() {
+    return selector;
+  }
+
+  public Event event() {
+    return event;
   }
 
 }

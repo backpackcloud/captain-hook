@@ -22,17 +22,9 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook.board;
+package io.backpackcloud.captain_hook;
 
-import io.backpackcloud.captain_hook.core.Address;
-import io.backpackcloud.captain_hook.core.Event;
-import io.backpackcloud.captain_hook.core.LabelSet;
-import io.backpackcloud.captain_hook.core.Notification;
-import io.backpackcloud.captain_hook.core.TemplateEngine;
-import io.backpackcloud.captain_hook.core.UnbelievableException;
-import io.backpackcloud.captain_hook.core.VirtualAddress;
-import io.backpackcloud.captain_hook.core.Webhook;
-import io.backpackcloud.captain_hook.core.WebhookMapping;
+import io.backpackcloud.captain_hook.api.JollyRoger;
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.jboss.logging.Logger;
 
@@ -48,10 +40,8 @@ import java.util.stream.Collectors;
  * <p>
  * Webhooks will be converted into events, events will be converted into notifications
  * and notifications will be delivered. Anything else will be walking the plank.
- * <p>
- * Since the Captain is very busy, probably only Mr Smee will interact with them.
  *
- * @see Smee
+ * @see JollyRoger
  */
 @ApplicationScoped
 public class Crew {
@@ -60,14 +50,18 @@ public class Crew {
 
   private final CaptainHook captainHook;
 
+  private final TemplateEngine templateEngine;
+
   /**
    * The crew needs the orders from the Captain in order
    *
-   * @param captainHook the orders from the captain so the crew can obey
+   * @param captainHook    the orders from the captain so the crew can obey
+   * @param templateEngine the template engine for parsing webhooks
    */
   @Inject
-  public Crew(CaptainHook captainHook) {
+  public Crew(CaptainHook captainHook, TemplateEngine templateEngine) {
     this.captainHook = captainHook;
+    this.templateEngine = templateEngine;
   }
 
   /**
@@ -100,18 +94,18 @@ public class Crew {
    * Captain Hook ordered the crew to count the actual delivers so that's why this
    * method is here.
    *
-   * @param notification the notification to deliver
+   * @param notification the notification to fire
    */
   @Counted(name = "notifications", description = "How many notifications were fired")
   public void deliver(Notification notification) {
     logger.infov("Delivering notification for {0}", notification.destination());
     captainHook.transmitters()
         .get(notification.destination().channel())
-        .deliver(notification);
+        .fire(notification);
   }
 
   /**
-   * Analyses the given event and deliver notifications to its subscribers.
+   * Analyses the given event and fire notifications to its subscribers.
    *
    * @param event the event to handle
    * @return a list containing the notifications fired
@@ -127,7 +121,7 @@ public class Crew {
   }
 
   @Counted(name = "webhooks", description = "How many webhooks were received")
-  public List<Event> handle(Webhook webhook, TemplateEngine templateEngine) {
+  public List<Event> handle(Webhook webhook) {
     logger.infov("Handling webhook");
     return captainHook.webhooks().stream()
         .filter(mapping -> mapping.matches(webhook))

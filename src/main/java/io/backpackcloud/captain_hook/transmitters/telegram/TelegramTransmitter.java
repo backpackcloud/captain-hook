@@ -26,9 +26,9 @@ package io.backpackcloud.captain_hook.transmitters.telegram;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.backpackcloud.captain_hook.core.Notification;
-import io.backpackcloud.captain_hook.core.SensitiveValue;
-import io.backpackcloud.captain_hook.core.Transmitter;
+import io.backpackcloud.captain_hook.Notification;
+import io.backpackcloud.captain_hook.SensitiveValue;
+import io.backpackcloud.captain_hook.Transmitter;
 import kong.unirest.Unirest;
 
 public class TelegramTransmitter implements Transmitter {
@@ -41,7 +41,7 @@ public class TelegramTransmitter implements Transmitter {
   }
 
   @Override
-  public void deliver(Notification notification) {
+  public void fire(Notification notification) {
     Unirest.post("https://api.telegram.org/bot{token}/sendMessage")
         .routeParam("token", token)
         .field("chat_id", notification.destination().id())

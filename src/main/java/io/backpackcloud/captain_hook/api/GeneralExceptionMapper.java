@@ -22,31 +22,20 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook.core;
+package io.backpackcloud.captain_hook.api;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import io.backpackcloud.captain_hook.transmitters.http.HTTPTransmitter;
-import io.backpackcloud.captain_hook.transmitters.pushover.PushoverTransmitter;
-import io.backpackcloud.captain_hook.transmitters.slack.SlackTransmitter;
-import io.backpackcloud.captain_hook.transmitters.telegram.TelegramTransmitter;
+import io.backpackcloud.captain_hook.UnbelievableException;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
-@JsonSubTypes({
-    @JsonSubTypes.Type(value = HTTPTransmitter.class, name = "http"),
-    @JsonSubTypes.Type(value = PushoverTransmitter.class, name = "pushover"),
-    @JsonSubTypes.Type(value = TelegramTransmitter.class, name = "telegram"),
-    @JsonSubTypes.Type(value = SlackTransmitter.class, name = "slack")
-})
-public interface Transmitter {
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
 
-  void deliver(Notification notification);
+@Provider
+public class GeneralExceptionMapper implements ExceptionMapper<UnbelievableException> {
 
-  default boolean isUp() {
-    return true;
+  @Override
+  public Response toResponse(UnbelievableException exception) {
+    return Response.status(400).entity(exception.getMessage()).build();
   }
-
-  Transmitter NULL = notification -> {
-  };
 
 }

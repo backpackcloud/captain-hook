@@ -24,7 +24,7 @@
 
 package io.backpackcloud.captain_hook.health;
 
-import io.backpackcloud.captain_hook.board.CaptainHook;
+import io.backpackcloud.captain_hook.CaptainHook;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.HealthCheckResponseBuilder;

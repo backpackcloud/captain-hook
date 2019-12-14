@@ -48,10 +48,9 @@
     <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
     <quarkus.platform.version>1.0.0.Final</quarkus.platform.version>
 
-    <unirest-java.version>2.3.17</unirest-java.version>
+    <unirest-java.version>3.3.00</unirest-java.version>
     <kodo.version>4.0.0</kodo.version>
     <freemarker.version>2.3.29</freemarker.version>
-    <kitteh-irc-client-lib.version>7.2.0</kitteh-irc-client-lib.version>
   </properties>
 
   <dependencyManagement>
@@ -75,11 +74,6 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-smallrye-openapi</artifactId>
     </dependency>
 
     <dependency>
@@ -109,15 +103,15 @@
     </dependency>
 
     <dependency>
-      <groupId>org.freemarker</groupId>
-      <artifactId>freemarker</artifactId>
-      <version>${freemarker.version}</version>
+      <groupId>com.konghq</groupId>
+      <artifactId>unirest-objectmapper-jackson</artifactId>
+      <version>${unirest-java.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>org.kitteh.irc</groupId>
-      <artifactId>client-lib</artifactId>
-      <version>${kitteh-irc-client-lib.version}</version>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
+      <version>${freemarker.version}</version>
     </dependency>
 
     <dependency>

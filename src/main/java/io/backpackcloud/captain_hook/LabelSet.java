@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook.core;
+package io.backpackcloud.captain_hook;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;

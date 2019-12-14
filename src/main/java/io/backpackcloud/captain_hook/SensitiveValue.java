@@ -22,37 +22,40 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook.core;
+package io.backpackcloud.captain_hook;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
-import java.util.Optional;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @RegisterForReflection
-public class WebhookMapping {
+public class SensitiveValue {
 
-  private final Selector selector;
-  private final Event event;
+  private final String value;
 
   @JsonCreator
-  public WebhookMapping(@JsonProperty("selector") Selector selector,
-                        @JsonProperty("event") Event event) {
-    this.selector = Optional.ofNullable(selector).orElseGet(Selector::empty);
-    this.event = event;
+  public SensitiveValue(String value) {
+    this.value = value;
   }
 
-  public boolean matches(Webhook webhook) {
-    return selector.test(webhook.labels());
+  public String value() {
+    return value;
   }
 
-  public Selector selector() {
-    return selector;
-  }
-
-  public Event event() {
-    return event;
+  @JsonCreator
+  public static SensitiveValue create(@JsonProperty("value") String value,
+                                      @JsonProperty("env") String env,
+                                      @JsonProperty("property") String property,
+                                      @JsonProperty("file") String file) throws IOException {
+    if (value != null) return new SensitiveValue(value);
+    else if (env != null) return new SensitiveValue(System.getenv(env));
+    else if (property != null) return new SensitiveValue(System.getProperty(property));
+    else if (file != null) return new SensitiveValue(Files.readString(Path.of(file)));
+    else throw new UnbelievableException("Unable to populate value");
   }
 
 }

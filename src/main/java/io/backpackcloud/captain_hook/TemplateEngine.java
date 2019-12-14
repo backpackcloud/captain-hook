@@ -22,36 +22,12 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook.core;
+package io.backpackcloud.captain_hook;
 
-import java.util.function.Supplier;
+import java.util.Map;
 
-/**
- * Exception thrown when unexpected things happen inside the API.
- */
-public class UnbelievableException extends RuntimeException {
+public interface TemplateEngine {
 
-  public UnbelievableException() {
-  }
-
-  public UnbelievableException(String message) {
-    super(message);
-  }
-
-  public UnbelievableException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
-  public UnbelievableException(Throwable cause) {
-    super(cause);
-  }
-
-  public UnbelievableException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-    super(message, cause, enableSuppression, writableStackTrace);
-  }
-
-  public static Supplier<UnbelievableException> because(String reasonMessage) {
-    return () -> new UnbelievableException(reasonMessage);
-  }
+  String evaluate(String template, Map<String, ?> context);
 
 }

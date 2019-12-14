@@ -22,18 +22,36 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook.core;
+package io.backpackcloud.captain_hook;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import java.util.function.Supplier;
 
-@Provider
-public class GeneralExceptionMapper implements ExceptionMapper<UnbelievableException> {
+/**
+ * Exception thrown when unexpected things happen inside the JollyRoger.
+ */
+public class UnbelievableException extends RuntimeException {
 
-  @Override
-  public Response toResponse(UnbelievableException exception) {
-    return Response.status(400).entity(exception.getMessage()).build();
+  public UnbelievableException() {
+  }
+
+  public UnbelievableException(String message) {
+    super(message);
+  }
+
+  public UnbelievableException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public UnbelievableException(Throwable cause) {
+    super(cause);
+  }
+
+  public UnbelievableException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    super(message, cause, enableSuppression, writableStackTrace);
+  }
+
+  public static Supplier<UnbelievableException> because(String reasonMessage) {
+    return () -> new UnbelievableException(reasonMessage);
   }
 
 }

@@ -26,9 +26,9 @@ package io.backpackcloud.captain_hook.transmitters.pushover;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.backpackcloud.captain_hook.core.Notification;
-import io.backpackcloud.captain_hook.core.SensitiveValue;
-import io.backpackcloud.captain_hook.core.Transmitter;
+import io.backpackcloud.captain_hook.Notification;
+import io.backpackcloud.captain_hook.SensitiveValue;
+import io.backpackcloud.captain_hook.Transmitter;
 import kong.unirest.Empty;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
@@ -47,7 +47,7 @@ public class PushoverTransmitter implements Transmitter {
   }
 
   @Override
-  public void deliver(Notification notification) {
+  public void fire(Notification notification) {
     CompletableFuture<HttpResponse<Empty>> future = Unirest
         .post("https://api.pushover.net/1/messages.json")
         .field("token", token)

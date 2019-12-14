@@ -26,13 +26,17 @@ package io.backpackcloud.captain_hook.transmitters.http;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.backpackcloud.captain_hook.core.Notification;
-import io.backpackcloud.captain_hook.core.Transmitter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.backpackcloud.captain_hook.Notification;
+import io.backpackcloud.captain_hook.Transmitter;
+import io.backpackcloud.captain_hook.UnbelievableException;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import kong.unirest.HttpRequestWithBody;
 import kong.unirest.Unirest;
-import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -54,16 +58,25 @@ public class HTTPTransmitter implements Transmitter {
   }
 
   @Override
-  public void deliver(Notification notification) {
-    HttpRequestWithBody post = Unirest.post(url);
-    if (route) post.routeParam("destination", notification.destination().id());
-    post.headers(headers)
-        .body(new JSONObject()
-            .put("message", notification.event().message())
-            .put("destination", notification.destination().id())
-            .put("labels", notification.labels().values())
-        )
-        .asEmpty();
+  public void fire(Notification notification) {
+    try {
+      Writer writer = new StringWriter();
+
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.writeValue(writer, notification);
+
+      HttpRequestWithBody post = Unirest.post(url);
+
+      if (route) post.routeParam("destination", notification.destination().id());
+
+      post.headers(headers)
+          .header("Content-Type", "application/json")
+          .body(writer.toString())
+          .asEmpty();
+    } catch (IOException e) {
+      throw new UnbelievableException(e);
+    }
+
   }
 
 }

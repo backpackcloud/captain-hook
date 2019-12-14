@@ -27,8 +27,8 @@ package io.backpackcloud.captain_hook.cdi;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.Template;
-import io.backpackcloud.captain_hook.core.TemplateEngine;
-import io.backpackcloud.captain_hook.core.UnbelievableException;
+import io.backpackcloud.captain_hook.TemplateEngine;
+import io.backpackcloud.captain_hook.UnbelievableException;
 import org.jboss.logging.Logger;
 
 import javax.enterprise.inject.Produces;

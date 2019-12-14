@@ -27,8 +27,8 @@ package io.backpackcloud.captain_hook.cdi;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import io.backpackcloud.captain_hook.board.CaptainHook;
-import io.backpackcloud.captain_hook.core.UnbelievableException;
+import io.backpackcloud.captain_hook.CaptainHook;
+import io.backpackcloud.captain_hook.UnbelievableException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.enterprise.inject.Produces;

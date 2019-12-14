@@ -22,12 +22,28 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook.core;
+package io.backpackcloud.captain_hook;
 
+import java.io.Serializable;
 import java.util.Map;
 
-public interface TemplateEngine {
+public class Webhook implements Serializable {
 
-  String evaluate(String template, Map<String, ?> context);
+  private final LabelSet labels;
+
+  private final Map<String, ?> payload;
+
+  public Webhook(LabelSet labels, Map<String, ?> payload) {
+    this.labels = labels;
+    this.payload = payload;
+  }
+
+  public LabelSet labels() {
+    return labels;
+  }
+
+  public Map<String, ?> payload() {
+    return this.payload;
+  }
 
 }

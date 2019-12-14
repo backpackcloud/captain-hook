@@ -26,28 +26,40 @@ package io.backpackcloud.captain_hook.transmitters.slack;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.backpackcloud.captain_hook.core.Notification;
-import io.backpackcloud.captain_hook.core.SensitiveValue;
-import io.backpackcloud.captain_hook.core.Transmitter;
+import io.backpackcloud.captain_hook.Notification;
+import io.backpackcloud.captain_hook.SensitiveValue;
+import io.backpackcloud.captain_hook.Transmitter;
+import kong.unirest.MultipartBody;
 import kong.unirest.Unirest;
 
 public class SlackTransmitter implements Transmitter {
 
   private final String token;
 
+  private final String username;
+
   @JsonCreator
-  public SlackTransmitter(@JsonProperty("token") SensitiveValue token) {
+  public SlackTransmitter(@JsonProperty("token") SensitiveValue token,
+                          @JsonProperty("username") String username) {
     this.token = token.value();
+    this.username = username;
   }
 
   @Override
-  public void deliver(Notification notification) {
-    Unirest.post("https://slack.com/api/chat.postMessage")
-        .field("token", token)
-        .field("as_user", "true")
+  public void fire(Notification notification) {
+    MultipartBody post = Unirest.post("https://slack.com/api/chat.postMessage")
+        .field("token", this.token)
         .field("channel", notification.destination().id())
-        .field("text", notification.message())
-        .asEmptyAsync();
+        .field("text", notification.message());
+
+    if (username != null) {
+      post.field("as_user", "false")
+          .field("username", username);
+    } else {
+      post.field("as_user", "true");
+    }
+
+    post.asEmptyAsync();
   }
 
 }
