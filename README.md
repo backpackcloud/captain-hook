@@ -46,7 +46,12 @@ Captain Hook expects a yaml file containing:
 - event subscriptions
 - webhook mappings
 
-### Sensitive Inputs
+The file can be passed by either:
+
+- `-Dconfig.file=/path/to/file` JVM parameter
+- `CONFIG_FILE=/path/to/file` environment variable
+
+### Sensitive Parameters
 
 Every sensitive configuration, such as passwords and tokens, can be provided through four ways:
 
