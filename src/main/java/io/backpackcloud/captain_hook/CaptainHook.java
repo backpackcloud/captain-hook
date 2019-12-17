@@ -54,7 +54,7 @@ public class CaptainHook {
   public CaptainHook(@JsonProperty("subscriptions") List<Subscription> subscriptions,
                      @JsonProperty("webhooks") List<WebhookMapping> webhooks,
                      @JsonProperty("virtual_addresses") Map<String, VirtualAddress> virtualAddresses,
-                     @JsonProperty("cannons") Map<String, Transmitter> transmitters) {
+                     @JsonProperty("transmitters") Map<String, Transmitter> transmitters) {
     this.subscriptions = subscriptions;
     this.webhooks = webhooks;
     this.virtualAddresses = virtualAddresses;

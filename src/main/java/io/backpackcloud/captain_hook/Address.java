@@ -30,16 +30,12 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Represents an address of a message.
  */
 @RegisterForReflection
 public class Address {
-
-  private static final Pattern PATTERN = Pattern.compile("(?<channel>\\w+):(?<id>.+)");
 
   public static final String VIRTUAL_CHANNEL = "virtual";
 
@@ -90,17 +86,16 @@ public class Address {
     if (string == null || string.isEmpty()) {
       throw new UnbelievableException("Cannot create an address with an empty string");
     }
-    Matcher matcher = PATTERN.matcher(string);
-    if (matcher.matches()) {
-      try {
-        String transmitter = matcher.group("channel");
-        String id = matcher.group("id");
-        return new Address(transmitter, id);
-      } catch (IllegalStateException e) {
-        throw new UnbelievableException("Cannot parse address: " + string, e);
-      }
+    String channel = VIRTUAL_CHANNEL;
+    String id = string;
+
+    String[] split = string.split(":", 2);
+    if (split.length == 2) {
+      channel = split[0];
+      id = split[1];
     }
-    return new Address(VIRTUAL_CHANNEL, string);
+
+    return new Address(channel, id);
   }
 
 }

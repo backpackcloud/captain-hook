@@ -152,7 +152,13 @@ public class JollyRoger {
       JsonNode node = objectMapper.readTree(payload);
       payloadData = objectMapper.treeToValue(node, Map.class);
 
-      Webhook webhook = new Webhook(extractLabels(uriInfo), payloadData);
+      Map<String, String> labelMap = new HashMap<>();
+
+      uriInfo.getQueryParameters().entrySet().stream()
+          .filter(entry -> !entry.getValue().isEmpty())
+          .forEach(entry -> labelMap.put(entry.getKey(), entry.getValue().get(0)));
+
+      Webhook webhook = new Webhook(LabelSet.of(labelMap), payloadData);
 
       List<Event> events = crew.handle(webhook);
 
@@ -162,16 +168,6 @@ public class JollyRoger {
     } catch (Exception e) {
       throw new UnbelievableException(e);
     }
-  }
-
-  private LabelSet extractLabels(UriInfo uriInfo) {
-    Map<String, String> map = new HashMap<>();
-
-    uriInfo.getQueryParameters().entrySet().stream()
-        .filter(entry -> !entry.getValue().isEmpty())
-        .forEach(entry -> map.put(entry.getKey(), entry.getValue().get(0)));
-
-    return LabelSet.of(map);
   }
 
 }
