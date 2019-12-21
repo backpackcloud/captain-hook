@@ -26,11 +26,11 @@ package io.backpackcloud.captain_hook.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import io.backpackcloud.captain_hook.Address;
 import io.backpackcloud.captain_hook.Crew;
 import io.backpackcloud.captain_hook.Event;
 import io.backpackcloud.captain_hook.LabelSet;
+import io.backpackcloud.captain_hook.Mapper;
 import io.backpackcloud.captain_hook.Notification;
 import io.backpackcloud.captain_hook.UnbelievableException;
 import io.backpackcloud.captain_hook.Webhook;
@@ -67,9 +67,12 @@ public class JollyRoger {
 
   private final Crew crew;
 
+  private final Mapper mapper;
+
   @Inject
-  public JollyRoger(Crew crew) {
+  public JollyRoger(Crew crew, Mapper mapper) {
     this.crew = crew;
+    this.mapper = mapper;
   }
 
   /**
@@ -143,9 +146,9 @@ public class JollyRoger {
     ObjectMapper objectMapper;
 
     if (MediaType.APPLICATION_XML_TYPE.equals(headers.getMediaType())) {
-      objectMapper = new XmlMapper();
+      objectMapper = mapper.xml();
     } else {
-      objectMapper = new ObjectMapper();
+      objectMapper = mapper.json();
     }
 
     try {

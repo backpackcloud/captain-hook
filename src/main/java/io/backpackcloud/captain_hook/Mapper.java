@@ -32,6 +32,8 @@ public interface Mapper {
 
   ObjectMapper yaml();
 
+  ObjectMapper xml();
+
   Mapper addDependency(String name, Object value);
 
 }

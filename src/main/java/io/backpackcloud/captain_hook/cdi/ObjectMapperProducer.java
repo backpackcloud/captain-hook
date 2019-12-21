@@ -27,6 +27,7 @@ package io.backpackcloud.captain_hook.cdi;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.InjectableValues;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -60,6 +61,10 @@ public class ObjectMapperProducer {
     yamlMapper.registerModules(new Jdk8Module(), new JavaTimeModule());
     yamlMapper.setInjectableValues(values);
 
+    final ObjectMapper xmlMapper = new XmlMapper();
+    xmlMapper.registerModules(new Jdk8Module(), new JavaTimeModule());
+    xmlMapper.setInjectableValues(values);
+
     Mapper mapper = new Mapper() {
 
       @Override
@@ -70,6 +75,11 @@ public class ObjectMapperProducer {
       @Override
       public ObjectMapper yaml() {
         return yamlMapper;
+      }
+
+      @Override
+      public ObjectMapper xml() {
+        return xmlMapper;
       }
 
       @Override
