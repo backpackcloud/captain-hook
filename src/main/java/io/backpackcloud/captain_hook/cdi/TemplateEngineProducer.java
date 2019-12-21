@@ -28,6 +28,7 @@ import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.Template;
 import io.backpackcloud.captain_hook.TemplateEngine;
+import io.backpackcloud.captain_hook.Transmitter;
 import io.backpackcloud.captain_hook.UnbelievableException;
 import org.jboss.logging.Logger;
 
@@ -46,14 +47,19 @@ public class TemplateEngineProducer {
   public TemplateEngine getEngine() {
     Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
     cfg.setObjectWrapper(new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_29).build());
+    cfg.setClassForTemplateLoading(Transmitter.class, "/io/backpackcloud/captain_hook/transmitters/");
 
-    return (template, context) -> {
-      if(template == null) return null;
+    return (templateString, context) -> {
+      if (templateString == null) return null;
 
+      Template template;
       Writer out = new StringWriter();
+
       try {
-        new Template("template", new StringReader(template), cfg)
-            .process(context, out);
+        if (templateString.endsWith(".ftl")) template = cfg.getTemplate(templateString);
+        else template = new Template("template", new StringReader(templateString), cfg);
+
+        template.process(context, out);
       } catch (Exception e) {
         logger.error("Error while processing template", e);
         throw new UnbelievableException(e);

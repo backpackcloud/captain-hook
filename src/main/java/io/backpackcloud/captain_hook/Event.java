@@ -43,7 +43,7 @@ public class Event {
   private final LabelSet labels;
 
   @JsonProperty
-  private final String type;
+  private final String name;
 
   @JsonProperty
   private final String title;
@@ -56,12 +56,12 @@ public class Event {
 
   @JsonCreator
   public Event(@JsonProperty("labels") LabelSet labelSet,
-               @JsonProperty("type") String type,
+               @JsonProperty("name") String name,
                @JsonProperty("message") String message,
                @JsonProperty("title") String title,
                @JsonProperty("url") String url) {
-    this.type = Optional.ofNullable(type)
-        .orElseThrow(UnbelievableException.because("Cannot create an event without a type"));
+    this.name = Optional.ofNullable(name)
+        .orElseThrow(UnbelievableException.because("Cannot create an event without a name"));
     this.labels = Optional.ofNullable(labelSet).orElseGet(LabelSet::empty);
     this.message = Optional.ofNullable(message)
         .orElseThrow(UnbelievableException.because("Cannot create an event without a message"));
@@ -73,8 +73,8 @@ public class Event {
     return this.labels;
   }
 
-  public String type() {
-    return this.type;
+  public String name() {
+    return this.name;
   }
 
   public String message() {
@@ -95,7 +95,7 @@ public class Event {
     if (o == null || getClass() != o.getClass()) return false;
     Event event = (Event) o;
     return labels.equals(event.labels) &&
-        type.equals(event.type) &&
+        name.equals(event.name) &&
         Objects.equals(title, event.title) &&
         message.equals(event.message) &&
         Objects.equals(url, event.url);
@@ -103,7 +103,7 @@ public class Event {
 
   @Override
   public int hashCode() {
-    return Objects.hash(labels, type, title, message, url);
+    return Objects.hash(labels, name, title, message, url);
   }
 
 }

@@ -24,20 +24,32 @@
 
 package io.backpackcloud.captain_hook.transmitters.telegram;
 
+import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.backpackcloud.captain_hook.Notification;
 import io.backpackcloud.captain_hook.SensitiveValue;
+import io.backpackcloud.captain_hook.TemplateEngine;
 import io.backpackcloud.captain_hook.Transmitter;
 import kong.unirest.Unirest;
 
+import java.util.Optional;
+
 public class TelegramTransmitter implements Transmitter {
 
+  private static final String DEFAULT_TEMPLATE = "telegram/notification.ftl";
+
   private final String token;
+  private final String template;
+  private final TemplateEngine templateEngine;
 
   @JsonCreator
-  public TelegramTransmitter(@JsonProperty("token") SensitiveValue token) {
+  public TelegramTransmitter(@JsonProperty("token") SensitiveValue token,
+                             @JsonProperty("template") String template,
+                             @JacksonInject("templateEngine") TemplateEngine templateEngine) {
     this.token = token.value();
+    this.template = Optional.ofNullable(template).orElse(DEFAULT_TEMPLATE);
+    this.templateEngine = templateEngine;
   }
 
   @Override
@@ -45,10 +57,7 @@ public class TelegramTransmitter implements Transmitter {
     Unirest.post("https://api.telegram.org/bot{token}/sendMessage")
         .routeParam("token", token)
         .field("chat_id", notification.destination().id())
-        .field("text", notification.message()
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;"))
+        .field("text", templateEngine.evaluate(template, notification.context()))
         .asEmptyAsync();
   }
 

@@ -39,28 +39,33 @@ import java.util.Optional;
 public class Subscription {
 
   private final Selector selector;
-  private final String type;
+  private final String name;
   private final Address destination;
+  private final Priority priority;
 
   @JsonCreator
   public Subscription(@JsonProperty("selector") Selector selector,
-                      @JsonProperty("type") String type,
-                      @JsonProperty("destination") Address destination) {
-    this.type = type;
+                      @JsonProperty("name") String name,
+                      @JsonProperty("destination") Address destination,
+                      @JsonProperty("priority") Priority priority) {
+    this.name = name;
     this.destination = Optional.ofNullable(destination)
         .orElseThrow(UnbelievableException.because("No destination defined"));
     this.selector = Optional.ofNullable(selector).orElseGet(Selector::empty);
-  }
-
-  public Address destination() {
-    return this.destination;
+    this.priority = priority;
   }
 
   public boolean matches(Event event) {
-    if (type != null && !type.equals(event.type())) {
+    if (name != null && !name.equals(event.name())) {
       return false;
     }
     return selector.test(event.labels());
+  }
+
+  public Optional<Notification> yield(Event event) {
+    if (matches(event))
+      return Optional.of(new Notification(event.title(), event.message(), event.url(), destination, priority));
+    else return Optional.empty();
   }
 
 }

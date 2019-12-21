@@ -105,7 +105,7 @@ public class JollyRoger {
       unit = MetricUnits.MILLISECONDS,
       description = "Measure of how long it takes for the crew to be aware of an event.")
   public Response process(Event event) {
-    logger.infov("Received event {0}", event.type());
+    logger.infov("Received event {0}", event.name());
 
     Set<Address> addresses = crew.handle(event).stream()
         .map(Notification::destination)
@@ -153,6 +153,10 @@ public class JollyRoger {
       payloadData = objectMapper.treeToValue(node, Map.class);
 
       Map<String, String> labelMap = new HashMap<>();
+
+      headers.getRequestHeaders().entrySet().stream()
+          .filter(entry -> !entry.getValue().isEmpty())
+          .forEach(entry -> labelMap.put(entry.getKey(), entry.getValue().get(0)));
 
       uriInfo.getQueryParameters().entrySet().stream()
           .filter(entry -> !entry.getValue().isEmpty())

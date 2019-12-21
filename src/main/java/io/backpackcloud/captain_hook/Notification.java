@@ -27,6 +27,8 @@ package io.backpackcloud.captain_hook;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -34,38 +36,62 @@ import java.util.Optional;
 public class Notification {
 
   @JsonProperty
-  private final Event event;
+  private final String title;
+
+  @JsonProperty
+  private final String message;
+
+  @JsonProperty
+  private final String url;
 
   @JsonProperty
   private final Address destination;
 
-  public Notification(Event event, Address destination) {
-    this.event = event;
-    this.destination = destination;
-  }
+  @JsonProperty
+  private final Priority priority;
 
-  public LabelSet labels() {
-    return event.labels();
+  public Notification(String title, String message, String url, Address destination, Priority priority) {
+    this.title = title;
+    this.message = Optional.ofNullable(message)
+        .orElseThrow(UnbelievableException.because("Cannot create a notification without a message"));
+    this.url = url;
+    this.destination = Optional.ofNullable(destination)
+        .orElseThrow(UnbelievableException.because("Cannot create a notification without a destination"));
+    this.priority = Optional.ofNullable(priority).orElse(Priority.NORMAL);
   }
 
   public String message() {
-    return event.message();
+    return message;
   }
 
   public Optional<String> title() {
-    return Optional.ofNullable(event.title());
+    return Optional.ofNullable(title);
   }
 
   public Optional<String> url() {
-    return Optional.ofNullable(event.url());
-  }
-
-  public Event event() {
-    return event;
+    return Optional.ofNullable(url);
   }
 
   public Address destination() {
     return destination;
+  }
+
+  public Priority priority() {
+    return priority;
+  }
+
+  public Notification changeAddress(Address newAddress) {
+    return new Notification(title, message, url, newAddress, priority);
+  }
+
+  public Map<String, ?> context() {
+    Map<String, Object> context = new HashMap<>();
+    context.put("title", title);
+    context.put("message", message);
+    context.put("url", url);
+    context.put("destination", destination);
+    context.put("priority", priority);
+    return context;
   }
 
   @Override
@@ -73,13 +99,16 @@ public class Notification {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     Notification that = (Notification) o;
-    return event.equals(that.event) &&
-        destination.equals(that.destination);
+    return Objects.equals(title, that.title) &&
+        message.equals(that.message) &&
+        Objects.equals(url, that.url) &&
+        destination.equals(that.destination) &&
+        priority == that.priority;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(event, destination);
+    return Objects.hash(title, message, url, destination, priority);
   }
 
 }

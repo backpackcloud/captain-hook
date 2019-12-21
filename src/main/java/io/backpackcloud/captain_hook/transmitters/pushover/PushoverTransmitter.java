@@ -32,10 +32,13 @@ import io.backpackcloud.captain_hook.Transmitter;
 import kong.unirest.Empty;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
+import org.jboss.logging.Logger;
 
 import java.util.concurrent.CompletableFuture;
 
 public class PushoverTransmitter implements Transmitter {
+
+  private static final Logger logger = Logger.getLogger(PushoverTransmitter.class);
 
   private final String token;
 
@@ -48,6 +51,7 @@ public class PushoverTransmitter implements Transmitter {
 
   @Override
   public void fire(Notification notification) {
+    logger.infov("Sending pushover notification to: {0}", notification.destination().id());
     CompletableFuture<HttpResponse<Empty>> future = Unirest
         .post("https://api.pushover.net/1/messages.json")
         .field("token", token)
@@ -55,6 +59,8 @@ public class PushoverTransmitter implements Transmitter {
         .field("title", notification.title().orElse(""))
         .field("url", notification.url().orElse(""))
         .field("message", notification.message())
+        // normal priority value is 0 for pushover
+        .field("priority", String.valueOf(notification.priority().relativeValue(0)))
         .asEmptyAsync();
     future.whenCompleteAsync(
         (response, exception) -> error = 400 <= response.getStatus() && response.getStatus() < 600);

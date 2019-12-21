@@ -22,7 +22,7 @@ When a webhook is captured, it will be analyzed in order to make an event from i
 
 Events are a simple structure composed by:
 
-- `type`: what differentiates this event from other events
+- `name`: what differentiates this event from other events
 - `labels` (optional): a set of labels that can be used for filtering if you need to be more specific than just a type
 - `title` (optional): the title of this event, it will be used for notification purposes
 - `message`: the message that describes this event, used for notifications
@@ -30,8 +30,11 @@ Events are a simple structure composed by:
 
 A Notification is the result of attaching an Event, to an Address. It contains:
 
-- `event`: contains an `Event` structure
+- `title` (optional): the title of this event, it will be used for notification purposes
+- `message`: the message that describes this event, used for notifications
+- `url` (optional): a url that contains more information about this event, used for notifications as well
 - `destination`: contains the address that should receive the notification
+- `priority`: the priority of this notification (`low`, `normal` or `high`)
 
 Addresses are composed by a channel name and a target destination. On top of that, Transmitters are responsible for reaching the address to deliver the notification.
 
@@ -84,26 +87,33 @@ Why specifying a file? In a Kubernetes/OpenShift environment you might want to u
 
 #### Transmitter Type
 
-Back to the common Transmitter configuration, every configuration must include the key `type` so the Captain can pass the right command to the crew. The supported Transmitters are:
+Back to the common Transmitter configuration, every configuration must include the key `type` so the Captain can pass the right command to the crew. You can have as much as Transmitters you need as long as they have different names.
 
 #### Telegram
 
-Telegram Bots are a nice way to deliver notifications, you can create a bot and have a token in less than one minute. All the Captain needs is `telegram` as `type` and a sensitive input as `token`.
+Telegram Bots are a nice way to deliver notifications, you can create a bot and have a token in less than one minute. All the Captain needs is `telegram` as `type`, a sensitive input as `token` and, optionally, a Freemarker template for how to structure the message.
 
 ```yaml
 transmitters:
   my_telegram_bot:
     type: telegram
     token: 999999999:01234567890ABCDEFGHIJ-KLMN
+    template: |
+      ${(title)!}
+      ${message}
+      ${(url)!}
 ```
 
+The variables that can be used in the template are: `title`, `message`, `url`, `destination` and `priority`. All related to the notification.
+ 
 #### Pushover
 
-Pushover is a notification service available for almost every platform. Captain knows how incredible it is and it's nice enough to allow you to configure it. All the Captain needs is `pushover` as `type` and a sensitive input as `token`.
+Pushover is a notification service available for almost every platform. Captain knows how incredible it is and it's nice enough to support it. All the Captain needs is `pushover` as `type` and a sensitive input as `token`.
 
 ```yaml
 transmitters:
   pushover:
+    # remember: type is required, even if it is the same name as the transmitter
     type: pushover
     token:
       value: lanrbhgjaiou4872yuijuqy68f7uhiadyg78u3
@@ -165,8 +175,8 @@ To configure subscriptions, you need to inform the event type, the labels that s
 
 ```yaml
 subscriptions:
-  # any event of type test will be sent to the virtual address test
-- type: test
+  # any event of name test will be sent to the virtual address test
+- name: test
   destination: test
   # any event with the label from=nexus will be sent to the slack:devs address
 - selector:
@@ -178,12 +188,13 @@ subscriptions:
 
 ### Webhook Mappings
 
-To configure the webhooks, you need to inform how the payload will be converted into an event. The crew allows you to define the values using a Freemarker template. These are the 
+To configure the webhooks, you need to inform how the payload will be converted into an event. The crew allows you to define the values using a Freemarker template. This is the structure of a webhook mapping:
 
 ```yaml
 webhooks:
 - selector:
     # the url should contain from=test as a query string
+    # or the header "from" should contain the value "test"
     from: test
   event:
     labels:
@@ -192,9 +203,53 @@ webhooks:
       # nested attributes are also allowed, everything from Freemarker can be used here
       # just try to stick with short values for labels
       category: ${data.info.category}
-    # type and message are required attributes
-    type: test
+    # name and message are required attributes
+    name: test
     message: Test event from ${person.contact.phone}
 ```
 
+The `selector` will be used to check if the webhook should be processed by this mapping. The `event` is the structure of the event that will be produced. Note that if you don't define a selector, every webhook will be processed by the same mapping.
 
+#### Webhook Examples
+
+Bellow are some examples of how to use Captain Hook with known tools for leverage notifications.
+
+##### Gitlab
+
+```yaml
+webhooks:
+- selector:
+    # GitLab sends this header so we can grab it on the selector
+    X-Gitlab-Event: Push Hook
+  event:
+    # use anything for labels that makes easy to make good filtering
+    labels:
+      source: gitlab
+      type: push
+      project: ${project.name}
+      ref: ${ref}
+      user: ${user_username}
+    name: gitlab.push
+    title: New push - ${project.name}
+    url: ${project.web_url}
+    message: |
+      ${total_commits_count} commits pushed by ${user_name}
+```
+
+This example will raise an event every time a GitLab push hook is received. Since the labels provide information about the project, branch and user, we could have subscriptions for those specific labels as well:
+
+```yaml
+- selector:
+    source: gitlab
+  # virtual address
+  destination: pushover_gitlab
+- selector:
+    source: gitlab
+    type: push
+    project: captain_hook
+    ref: refs/heads/master
+  # virtual address
+  destination: captain_hook_team
+```
+
+With this example, every event from gitlab will notify the `pushover_gitlab` address but, if the event is also for a push on the `master` branch of the `captain_hook` project, the event will also notify the `captain_hook_team` virtual address.

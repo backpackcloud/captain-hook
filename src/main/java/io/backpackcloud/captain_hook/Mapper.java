@@ -22,37 +22,16 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook.cdi;
+package io.backpackcloud.captain_hook;
 
-import io.backpackcloud.captain_hook.CaptainHook;
-import io.backpackcloud.captain_hook.Mapper;
-import io.backpackcloud.captain_hook.TemplateEngine;
-import io.backpackcloud.captain_hook.UnbelievableException;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import javax.enterprise.inject.Produces;
-import javax.inject.Singleton;
-import java.io.File;
-import java.io.IOException;
+public interface Mapper {
 
-public class ConfigProducer {
+  ObjectMapper json();
 
-  private final String configFile;
+  ObjectMapper yaml();
 
-  public ConfigProducer(@ConfigProperty(name = "config.file", defaultValue = "captain-hook.yml") String configFile) {
-    this.configFile = configFile;
-  }
-
-  @Produces
-  @Singleton
-  public CaptainHook getConfig(TemplateEngine templateEngine, Mapper mapper) {
-    try {
-      mapper.addDependency("templateEngine", templateEngine);
-
-      return mapper.yaml().readValue(new File(configFile), CaptainHook.class);
-    } catch (IOException e) {
-      throw new UnbelievableException(e);
-    }
-  }
+  Mapper addDependency(String name, Object value);
 
 }

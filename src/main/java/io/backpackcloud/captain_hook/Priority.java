@@ -22,37 +22,38 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook.cdi;
+package io.backpackcloud.captain_hook;
 
-import io.backpackcloud.captain_hook.CaptainHook;
-import io.backpackcloud.captain_hook.Mapper;
-import io.backpackcloud.captain_hook.TemplateEngine;
-import io.backpackcloud.captain_hook.UnbelievableException;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
-import javax.enterprise.inject.Produces;
-import javax.inject.Singleton;
-import java.io.File;
-import java.io.IOException;
+public enum Priority {
 
-public class ConfigProducer {
+  LOW(-1), NORMAL(0), HIGH(1);
 
-  private final String configFile;
+  private final int value;
 
-  public ConfigProducer(@ConfigProperty(name = "config.file", defaultValue = "captain-hook.yml") String configFile) {
-    this.configFile = configFile;
+  Priority(int value) {
+    this.value = value;
   }
 
-  @Produces
-  @Singleton
-  public CaptainHook getConfig(TemplateEngine templateEngine, Mapper mapper) {
-    try {
-      mapper.addDependency("templateEngine", templateEngine);
+  public int value() {
+    return value;
+  }
 
-      return mapper.yaml().readValue(new File(configFile), CaptainHook.class);
-    } catch (IOException e) {
-      throw new UnbelievableException(e);
-    }
+  public int relativeValue(int referenceValue) {
+    return this.value + referenceValue;
+  }
+
+  @JsonValue
+  @Override
+  public String toString() {
+    return name().toLowerCase();
+  }
+
+  @JsonCreator
+  public static Priority get(String priority) {
+    return Priority.valueOf(priority.toUpperCase());
   }
 
 }

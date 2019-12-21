@@ -33,6 +33,7 @@ import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -78,7 +79,7 @@ public class Crew {
         if (notification.destination().equals(newAddress)) {
           throw new UnbelievableException("Cannot redirect to the same address");
         }
-        handle(new Notification(notification.event(), newAddress));
+        handle(notification.changeAddress(newAddress));
       }
     } else {
       if (captainHook.transmitters().containsKey(notification.destination().channel())) {
@@ -112,10 +113,11 @@ public class Crew {
    */
   @Counted(name = "events", description = "How many events were fired")
   public List<Notification> handle(Event event) {
-    logger.infov("Handling event {0}", event.type());
+    logger.infov("Handling event {0}", event.name());
     return captainHook.subscriptions().stream()
-        .filter(subscription -> subscription.matches(event))
-        .map(subscription -> new Notification(event, subscription.destination()))
+        .map(subscription -> subscription.yield(event))
+        .filter(Optional::isPresent)
+        .map(Optional::get)
         .peek(this::handle)
         .collect(Collectors.toList());
   }
@@ -127,13 +129,13 @@ public class Crew {
         .filter(mapping -> mapping.matches(webhook))
         .map(WebhookMapping::event)
         .map(mapping -> {
-          Map<String, String> eventLabels = new HashMap<>(webhook.labels().values());
+          Map<String, String> eventLabels = new HashMap<>();
 
           mapping.labels().values()
               .forEach((key, value) -> eventLabels.put(key, templateEngine.evaluate(value, webhook.payload())));
 
           return new Event(LabelSet.of(eventLabels),
-              templateEngine.evaluate(mapping.type(), webhook.payload()),
+              templateEngine.evaluate(mapping.name(), webhook.payload()),
               templateEngine.evaluate(mapping.message(), webhook.payload()),
               templateEngine.evaluate(mapping.title(), webhook.payload()),
               templateEngine.evaluate(mapping.url(), webhook.payload()));

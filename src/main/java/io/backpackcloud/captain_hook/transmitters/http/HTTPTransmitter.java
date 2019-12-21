@@ -24,14 +24,17 @@
 
 package io.backpackcloud.captain_hook.transmitters.http;
 
+import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.backpackcloud.captain_hook.Mapper;
 import io.backpackcloud.captain_hook.Notification;
 import io.backpackcloud.captain_hook.Transmitter;
 import io.backpackcloud.captain_hook.UnbelievableException;
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import kong.unirest.Empty;
 import kong.unirest.HttpRequestWithBody;
+import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 
 import java.io.IOException;
@@ -40,6 +43,7 @@ import java.io.Writer;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @RegisterForReflection
 public class HTTPTransmitter implements Transmitter {
@@ -47,14 +51,19 @@ public class HTTPTransmitter implements Transmitter {
   private final String url;
   private final Map<String, String> headers;
   private final boolean route;
+  private final Mapper mapper;
+
+  private boolean error;
 
   @JsonCreator
   public HTTPTransmitter(@JsonProperty("url") String url,
-                         @JsonProperty("headers") Map<String, String> headers) {
+                         @JsonProperty("headers") Map<String, String> headers,
+                         @JacksonInject("mapper") Mapper mapper) {
     this.url = url;
     this.headers = Optional.ofNullable(headers)
         .orElseGet(Collections::emptyMap);
     this.route = url.contains("{destination}");
+    this.mapper = mapper;
   }
 
   @Override
@@ -62,21 +71,28 @@ public class HTTPTransmitter implements Transmitter {
     try {
       Writer writer = new StringWriter();
 
-      ObjectMapper objectMapper = new ObjectMapper();
-      objectMapper.writeValue(writer, notification);
+      mapper.json().writeValue(writer, notification);
 
       HttpRequestWithBody post = Unirest.post(url);
 
       if (route) post.routeParam("destination", notification.destination().id());
 
-      post.headers(headers)
+      CompletableFuture<HttpResponse<Empty>> future = post.headers(headers)
           .header("Content-Type", "application/json")
           .body(writer.toString())
-          .asEmpty();
+          .asEmptyAsync();
+
+      future.whenCompleteAsync(
+          (response, exception) -> error = response.getStatus() % 500 < 100);
     } catch (IOException e) {
       throw new UnbelievableException(e);
     }
 
+  }
+
+  @Override
+  public boolean isUp() {
+    return !error;
   }
 
 }
