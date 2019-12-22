@@ -25,6 +25,7 @@
 package io.backpackcloud.captain_hook;
 
 import io.backpackcloud.captain_hook.api.JollyRoger;
+import io.vertx.axle.core.eventbus.EventBus;
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.jboss.logging.Logger;
 
@@ -53,16 +54,20 @@ public class Crew {
 
   private final TemplateEngine templateEngine;
 
+  private final EventBus eventBus;
+
   /**
    * The crew needs the orders from the Captain in order
    *
    * @param captainHook    the orders from the captain so the crew can obey
    * @param templateEngine the template engine for parsing webhooks
+   * @param eventBus       the event bus to use
    */
   @Inject
-  public Crew(CaptainHook captainHook, TemplateEngine templateEngine) {
+  public Crew(CaptainHook captainHook, TemplateEngine templateEngine, EventBus eventBus) {
     this.captainHook = captainHook;
     this.templateEngine = templateEngine;
+    this.eventBus = eventBus;
   }
 
   /**
@@ -100,9 +105,7 @@ public class Crew {
   @Counted(name = "notifications", description = "How many notifications were fired")
   public void deliver(Notification notification) {
     logger.infov("Delivering notification for {0}", notification.destination());
-    captainHook.transmitters()
-        .get(notification.destination().channel())
-        .fire(notification);
+    eventBus.sender("fire").write(notification);
   }
 
   /**
