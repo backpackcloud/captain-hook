@@ -32,64 +32,122 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import io.backpackcloud.captain_hook.Mapper;
 import io.backpackcloud.captain_hook.Serializer;
+import io.backpackcloud.captain_hook.UnbelievableException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Singleton;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 
 @ApplicationScoped
-public class ObjectMapperProducer {
+public class SerializerProducer {
+
+  private final ObjectMapper jsonMapper;
+  private final ObjectMapper yamlMapper;
+  private final ObjectMapper xmlMapper;
+  private final InjectableValues.Std values;
+
+  private final Serializer serializer;
+
+  public SerializerProducer() {
+    values = new InjectableValues.Std();
+
+    jsonMapper = new ObjectMapper();
+    jsonMapper.registerModules(new Jdk8Module(), new JavaTimeModule(), new ParameterNamesModule());
+    jsonMapper.setInjectableValues(values);
+
+    yamlMapper = new ObjectMapper(new YAMLFactory());
+    yamlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    yamlMapper.registerModules(new Jdk8Module(), new JavaTimeModule());
+    yamlMapper.setInjectableValues(values);
+
+    xmlMapper = new XmlMapper();
+    xmlMapper.registerModules(new Jdk8Module(), new JavaTimeModule());
+    xmlMapper.setInjectableValues(values);
+
+    serializer = new SerializerImpl();
+    values.addValue("serializer", serializer);
+  }
 
   @Produces
   @Singleton
-  public ObjectMapper getObjectMapper(Serializer serializer) {
-    return serializer.json();
+  public ObjectMapper getObjectMapper() {
+    return jsonMapper;
   }
 
   @Singleton
   @Produces
   public Serializer get() {
-    final InjectableValues.Std values = new InjectableValues.Std();
+    return serializer;
+  }
 
-    final ObjectMapper jsonMapper = new ObjectMapper();
-    jsonMapper.registerModules(new Jdk8Module(), new JavaTimeModule(), new ParameterNamesModule());
-    jsonMapper.setInjectableValues(values);
+  class SerializerImpl implements Serializer {
 
-    final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
-    yamlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    yamlMapper.registerModules(new Jdk8Module(), new JavaTimeModule());
-    yamlMapper.setInjectableValues(values);
+    @Override
+    public Mapper json() {
+      return new MapperImpl(jsonMapper);
+    }
 
-    final ObjectMapper xmlMapper = new XmlMapper();
-    xmlMapper.registerModules(new Jdk8Module(), new JavaTimeModule());
-    xmlMapper.setInjectableValues(values);
+    @Override
+    public Mapper yaml() {
+      return new MapperImpl(yamlMapper);
+    }
 
-    Serializer serializer = new Serializer() {
+    @Override
+    public Mapper xml() {
+      return new MapperImpl(xmlMapper);
+    }
 
-      @Override
-      public ObjectMapper json() {
-        return jsonMapper;
+    @Override
+    public Serializer addDependency(String name, Object value) {
+      values.addValue(name, value);
+      return this;
+    }
+
+  }
+
+  static class MapperImpl implements Mapper {
+
+    private final ObjectMapper objectMapper;
+
+    MapperImpl(ObjectMapper objectMapper) {
+      this.objectMapper = objectMapper;
+    }
+
+    @Override
+    public String serialize(Object object) {
+      Writer writer = new StringWriter();
+      try {
+        objectMapper.writeValue(writer, object);
+      } catch (IOException e) {
+        throw new UnbelievableException(e);
       }
+      return writer.toString();
+    }
 
-      @Override
-      public ObjectMapper yaml() {
-        return yamlMapper;
+    @Override
+    public <E> E deserialize(String input, Class<E> type) {
+      try {
+        return objectMapper.readValue(input, type);
+      } catch (IOException e) {
+        throw new UnbelievableException(e);
       }
+    }
 
-      @Override
-      public ObjectMapper xml() {
-        return xmlMapper;
+    @Override
+    public <E> E deserialize(File file, Class<E> type) {
+      try {
+        return objectMapper.readValue(file, type);
+      } catch (IOException e) {
+        throw new UnbelievableException(e);
       }
+    }
 
-      @Override
-      public Serializer addDependency(String name, Object value) {
-        values.addValue(name, value);
-        return this;
-      }
-
-    };
-    return serializer.addDependency("serializer", serializer);
   }
 
 }

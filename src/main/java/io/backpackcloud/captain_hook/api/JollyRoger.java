@@ -24,14 +24,13 @@
 
 package io.backpackcloud.captain_hook.api;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.backpackcloud.captain_hook.Address;
 import io.backpackcloud.captain_hook.Crew;
 import io.backpackcloud.captain_hook.Event;
 import io.backpackcloud.captain_hook.LabelSet;
-import io.backpackcloud.captain_hook.Serializer;
+import io.backpackcloud.captain_hook.Mapper;
 import io.backpackcloud.captain_hook.Notification;
+import io.backpackcloud.captain_hook.Serializer;
 import io.backpackcloud.captain_hook.UnbelievableException;
 import io.backpackcloud.captain_hook.Webhook;
 import org.eclipse.microprofile.metrics.MetricUnits;
@@ -55,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The Captain's ship. If you wanna board something, be sure to do it right :)
@@ -142,26 +142,19 @@ public class JollyRoger {
                           @Context HttpHeaders headers,
                           String payload) {
     logger.infov("Received webhook");
-    Map<String, ?> payloadData;
-    ObjectMapper objectMapper;
+    Mapper mapper;
 
     if (MediaType.APPLICATION_XML_TYPE.equals(headers.getMediaType())) {
-      objectMapper = serializer.xml();
+      mapper = serializer.xml();
     } else {
-      objectMapper = serializer.json();
+      mapper = serializer.json();
     }
 
     try {
-      JsonNode node = objectMapper.readTree(payload);
-      payloadData = objectMapper.treeToValue(node, Map.class);
-
+      Map<String, ?> payloadData = mapper.deserialize(payload);
       Map<String, String> labelMap = new HashMap<>();
 
-      headers.getRequestHeaders().entrySet().stream()
-          .filter(entry -> !entry.getValue().isEmpty())
-          .forEach(entry -> labelMap.put(entry.getKey(), entry.getValue().get(0)));
-
-      uriInfo.getQueryParameters().entrySet().stream()
+      Stream.concat(headers.getRequestHeaders().entrySet().stream(), uriInfo.getQueryParameters().entrySet().stream())
           .filter(entry -> !entry.getValue().isEmpty())
           .forEach(entry -> labelMap.put(entry.getKey(), entry.getValue().get(0)));
 
@@ -170,8 +163,7 @@ public class JollyRoger {
       List<Event> events = crew.handle(webhook);
 
       if (events.isEmpty()) return Response.noContent().build();
-
-      return Response.ok(new HashSet<>(events)).build();
+      else return Response.ok(new HashSet<>(events)).build();
     } catch (Exception e) {
       throw new UnbelievableException(e);
     }

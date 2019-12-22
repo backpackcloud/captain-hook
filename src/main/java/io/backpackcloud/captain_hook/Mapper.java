@@ -22,33 +22,21 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook.cdi;
+package io.backpackcloud.captain_hook;
 
-import io.backpackcloud.captain_hook.CaptainHook;
-import io.backpackcloud.captain_hook.Serializer;
-import io.backpackcloud.captain_hook.TemplateEngine;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-import javax.inject.Singleton;
 import java.io.File;
+import java.util.Map;
 
-@ApplicationScoped
-public class ConfigProducer {
+public interface Mapper {
 
-  private final String configFile;
+  String serialize(Object object);
 
-  public ConfigProducer(@ConfigProperty(name = "config.file", defaultValue = "captain-hook.yml") String configFile) {
-    this.configFile = configFile;
-  }
+  <E> E deserialize(String input, Class<E> type);
 
-  @Produces
-  @Singleton
-  public CaptainHook getConfig(TemplateEngine templateEngine, Serializer serializer) {
-    serializer.addDependency("templateEngine", templateEngine);
+  <E> E deserialize(File file, Class<E> type);
 
-    return serializer.yaml().deserialize(new File(configFile), CaptainHook.class);
+  default Map<String, ?> deserialize(String input) {
+    return deserialize(input, Map.class);
   }
 
 }
