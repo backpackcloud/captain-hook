@@ -25,7 +25,7 @@
 package io.backpackcloud.captain_hook.cdi;
 
 import io.backpackcloud.captain_hook.CaptainHook;
-import io.backpackcloud.captain_hook.Mapper;
+import io.backpackcloud.captain_hook.Serializer;
 import io.backpackcloud.captain_hook.TemplateEngine;
 import io.backpackcloud.captain_hook.UnbelievableException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -45,11 +45,11 @@ public class ConfigProducer {
 
   @Produces
   @Singleton
-  public CaptainHook getConfig(TemplateEngine templateEngine, Mapper mapper) {
+  public CaptainHook getConfig(TemplateEngine templateEngine, Serializer serializer) {
     try {
-      mapper.addDependency("templateEngine", templateEngine);
+      serializer.addDependency("templateEngine", templateEngine);
 
-      return mapper.yaml().readValue(new File(configFile), CaptainHook.class);
+      return serializer.yaml().readValue(new File(configFile), CaptainHook.class);
     } catch (IOException e) {
       throw new UnbelievableException(e);
     }

@@ -30,7 +30,7 @@ import io.backpackcloud.captain_hook.Address;
 import io.backpackcloud.captain_hook.Crew;
 import io.backpackcloud.captain_hook.Event;
 import io.backpackcloud.captain_hook.LabelSet;
-import io.backpackcloud.captain_hook.Mapper;
+import io.backpackcloud.captain_hook.Serializer;
 import io.backpackcloud.captain_hook.Notification;
 import io.backpackcloud.captain_hook.UnbelievableException;
 import io.backpackcloud.captain_hook.Webhook;
@@ -67,12 +67,12 @@ public class JollyRoger {
 
   private final Crew crew;
 
-  private final Mapper mapper;
+  private final Serializer serializer;
 
   @Inject
-  public JollyRoger(Crew crew, Mapper mapper) {
+  public JollyRoger(Crew crew, Serializer serializer) {
     this.crew = crew;
-    this.mapper = mapper;
+    this.serializer = serializer;
   }
 
   /**
@@ -146,9 +146,9 @@ public class JollyRoger {
     ObjectMapper objectMapper;
 
     if (MediaType.APPLICATION_XML_TYPE.equals(headers.getMediaType())) {
-      objectMapper = mapper.xml();
+      objectMapper = serializer.xml();
     } else {
-      objectMapper = mapper.json();
+      objectMapper = serializer.json();
     }
 
     try {

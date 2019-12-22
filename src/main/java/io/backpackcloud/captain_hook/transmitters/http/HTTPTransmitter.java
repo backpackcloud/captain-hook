@@ -27,7 +27,7 @@ package io.backpackcloud.captain_hook.transmitters.http;
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.backpackcloud.captain_hook.Mapper;
+import io.backpackcloud.captain_hook.Serializer;
 import io.backpackcloud.captain_hook.Notification;
 import io.backpackcloud.captain_hook.Transmitter;
 import io.backpackcloud.captain_hook.UnbelievableException;
@@ -51,19 +51,19 @@ public class HTTPTransmitter implements Transmitter {
   private final String url;
   private final Map<String, String> headers;
   private final boolean route;
-  private final Mapper mapper;
+  private final Serializer serializer;
 
   private boolean error;
 
   @JsonCreator
   public HTTPTransmitter(@JsonProperty("url") String url,
                          @JsonProperty("headers") Map<String, String> headers,
-                         @JacksonInject("mapper") Mapper mapper) {
+                         @JacksonInject("serializer") Serializer serializer) {
     this.url = url;
     this.headers = Optional.ofNullable(headers)
         .orElseGet(Collections::emptyMap);
     this.route = url.contains("{destination}");
-    this.mapper = mapper;
+    this.serializer = serializer;
   }
 
   @Override
@@ -71,7 +71,7 @@ public class HTTPTransmitter implements Transmitter {
     try {
       Writer writer = new StringWriter();
 
-      mapper.json().writeValue(writer, notification);
+      serializer.json().writeValue(writer, notification);
 
       HttpRequestWithBody post = Unirest.post(url);
 

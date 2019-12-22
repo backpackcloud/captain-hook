@@ -26,7 +26,7 @@ package io.backpackcloud.captain_hook;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public interface Mapper {
+public interface Serializer {
 
   ObjectMapper json();
 
@@ -34,6 +34,6 @@ public interface Mapper {
 
   ObjectMapper xml();
 
-  Mapper addDependency(String name, Object value);
+  Serializer addDependency(String name, Object value);
 
 }

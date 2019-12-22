@@ -32,7 +32,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import io.backpackcloud.captain_hook.Mapper;
+import io.backpackcloud.captain_hook.Serializer;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -43,13 +43,13 @@ public class ObjectMapperProducer {
 
   @Produces
   @Singleton
-  public ObjectMapper getObjectMapper(Mapper mapper) {
-    return mapper.json();
+  public ObjectMapper getObjectMapper(Serializer serializer) {
+    return serializer.json();
   }
 
   @Singleton
   @Produces
-  public Mapper get() {
+  public Serializer get() {
     final InjectableValues.Std values = new InjectableValues.Std();
 
     final ObjectMapper jsonMapper = new ObjectMapper();
@@ -65,7 +65,7 @@ public class ObjectMapperProducer {
     xmlMapper.registerModules(new Jdk8Module(), new JavaTimeModule());
     xmlMapper.setInjectableValues(values);
 
-    Mapper mapper = new Mapper() {
+    Serializer serializer = new Serializer() {
 
       @Override
       public ObjectMapper json() {
@@ -83,13 +83,13 @@ public class ObjectMapperProducer {
       }
 
       @Override
-      public Mapper addDependency(String name, Object value) {
+      public Serializer addDependency(String name, Object value) {
         values.addValue(name, value);
         return this;
       }
 
     };
-    return mapper.addDependency("mapper", mapper);
+    return serializer.addDependency("serializer", serializer);
   }
 
 }
