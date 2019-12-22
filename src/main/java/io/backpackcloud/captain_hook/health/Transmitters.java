@@ -46,11 +46,8 @@ public class Transmitters implements HealthCheck {
   public HealthCheckResponse call() {
     HealthCheckResponseBuilder response = HealthCheckResponse.named("Transmitters");
     response.up();
-    captainHook.transmitters().forEach((name, transmitter) -> {
-      boolean up = transmitter.isUp();
-      if (!up) response.down();
-      response.withData(name, up);
-    });
+    captainHook.transmitters()
+        .forEach((name, transmitter) -> response.withData(name, transmitter.isUp()));
     return response.build();
   }
 
