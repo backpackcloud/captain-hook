@@ -37,8 +37,6 @@ import java.util.Optional;
 
 public class TelegramTransmitter implements Transmitter {
 
-  private static final String DEFAULT_TEMPLATE = "telegram/notification.ftl";
-
   private final String token;
   private final String template;
   private final TemplateEngine templateEngine;
@@ -48,7 +46,7 @@ public class TelegramTransmitter implements Transmitter {
                              @JsonProperty("template") String template,
                              @JacksonInject("templateEngine") TemplateEngine templateEngine) {
     this.token = token.value();
-    this.template = Optional.ofNullable(template).orElse(DEFAULT_TEMPLATE);
+    this.template = Optional.ofNullable(template).orElse("telegram/notification.ftl");
     this.templateEngine = templateEngine;
   }
 

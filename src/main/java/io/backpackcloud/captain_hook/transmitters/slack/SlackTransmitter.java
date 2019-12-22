@@ -24,25 +24,34 @@
 
 package io.backpackcloud.captain_hook.transmitters.slack;
 
+import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.backpackcloud.captain_hook.Notification;
 import io.backpackcloud.captain_hook.SensitiveValue;
+import io.backpackcloud.captain_hook.TemplateEngine;
 import io.backpackcloud.captain_hook.Transmitter;
 import kong.unirest.MultipartBody;
 import kong.unirest.Unirest;
 
+import java.util.Optional;
+
 public class SlackTransmitter implements Transmitter {
 
   private final String token;
-
   private final String username;
+  private final String template;
+  private final TemplateEngine templateEngine;
 
   @JsonCreator
   public SlackTransmitter(@JsonProperty("token") SensitiveValue token,
-                          @JsonProperty("username") String username) {
+                          @JsonProperty("username") String username,
+                          @JsonProperty("template") String template,
+                          @JacksonInject("templateEngine") TemplateEngine templateEngine) {
     this.token = token.value();
     this.username = username;
+    this.template = Optional.ofNullable(template).orElse("slack/notification.ftl");
+    this.templateEngine = templateEngine;
   }
 
   @Override
@@ -50,7 +59,7 @@ public class SlackTransmitter implements Transmitter {
     MultipartBody post = Unirest.post("https://slack.com/api/chat.postMessage")
         .field("token", this.token)
         .field("channel", notification.destination().id())
-        .field("text", notification.message());
+        .field("text", templateEngine.evaluate(template, notification.context()));
 
     if (username != null) {
       post.field("as_user", "false")
