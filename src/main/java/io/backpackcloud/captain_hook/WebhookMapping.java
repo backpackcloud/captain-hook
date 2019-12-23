@@ -40,7 +40,9 @@ public class WebhookMapping {
   public WebhookMapping(@JsonProperty("selector") Selector selector,
                         @JsonProperty("event") Event event) {
     this.selector = Optional.ofNullable(selector).orElseGet(Selector::empty);
-    this.event = event;
+    this.event = Optional.ofNullable(event)
+        .orElseThrow(UnbelievableException
+            .because("Cannot create a webhook mapping without an event definition"));
   }
 
   public boolean matches(Webhook webhook) {
