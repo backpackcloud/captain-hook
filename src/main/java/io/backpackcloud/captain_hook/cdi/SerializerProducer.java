@@ -34,6 +34,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import io.backpackcloud.captain_hook.Mapper;
 import io.backpackcloud.captain_hook.Serializer;
+import io.backpackcloud.captain_hook.TemplateEngine;
 import io.backpackcloud.captain_hook.UnbelievableException;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -71,7 +72,6 @@ public class SerializerProducer {
     xmlMapper.setInjectableValues(values);
 
     serializer = new SerializerImpl();
-    values.addValue("serializer", serializer);
   }
 
   @Produces
@@ -82,7 +82,9 @@ public class SerializerProducer {
 
   @Singleton
   @Produces
-  public Serializer get() {
+  public Serializer get(TemplateEngine templateEngine) {
+    values.addValue("serializer", serializer);
+    values.addValue("templateEngine", templateEngine);
     return serializer;
   }
 
@@ -101,12 +103,6 @@ public class SerializerProducer {
     @Override
     public Mapper xml() {
       return new MapperImpl(xmlMapper);
-    }
-
-    @Override
-    public Serializer addDependency(String name, Object value) {
-      values.addValue(name, value);
-      return this;
     }
 
   }

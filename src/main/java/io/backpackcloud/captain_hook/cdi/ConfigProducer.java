@@ -26,7 +26,6 @@ package io.backpackcloud.captain_hook.cdi;
 
 import io.backpackcloud.captain_hook.CaptainHook;
 import io.backpackcloud.captain_hook.Serializer;
-import io.backpackcloud.captain_hook.TemplateEngine;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -45,9 +44,7 @@ public class ConfigProducer {
 
   @Produces
   @Singleton
-  public CaptainHook getConfig(TemplateEngine templateEngine, Serializer serializer) {
-    serializer.addDependency("templateEngine", templateEngine);
-
+  public CaptainHook getConfig(Serializer serializer) {
     return serializer.yaml().deserialize(new File(configFile), CaptainHook.class);
   }
 
