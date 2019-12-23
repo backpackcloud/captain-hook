@@ -24,12 +24,30 @@
 
 package io.backpackcloud.captain_hook;
 
+/**
+ * Interface that exposes components for serializing different formats of input.
+ */
 public interface Serializer {
 
+  /**
+   * Returns the mapper for json data type.
+   *
+   * @return the mapper for json data type.
+   */
   Mapper json();
 
+  /**
+   * Returns the mapper for the yaml data type.
+   *
+   * @return the mapper for the yaml data type.
+   */
   Mapper yaml();
 
+  /**
+   * Returns the mapper for the xml data type.
+   *
+   * @return the mapper for the xml data type.
+   */
   Mapper xml();
 
 }

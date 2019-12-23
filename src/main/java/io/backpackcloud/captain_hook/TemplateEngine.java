@@ -26,8 +26,21 @@ package io.backpackcloud.captain_hook;
 
 import java.util.Map;
 
+/**
+ * Interface that defines a template engine.
+ * <p>
+ * The engine will encapsulate the hard work of setting up the configuration.
+ */
 public interface TemplateEngine {
 
+  /**
+   * Evaluates the given template using the context map as the provided variables.
+   * If the template is a file, it will be loaded.
+   *
+   * @param template a string of a file containing the template
+   * @param context  the set of variables to use when evaluating the template
+   * @return the result of the evaluation
+   */
   String evaluate(String template, Map<String, ?> context);
 
 }

@@ -32,11 +32,21 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Represents an address of a message.
+ * Represents an address that can receive a notification.
+ * <p>
+ * Address are structured in two parts: a channel and an id. A channel
+ * maps to a {@link Transmitter} so only that transmitter knows how to
+ * reach to the given id.
+ * <p>
+ * An address can also be virtual, which means it points to one or more addresses
+ * (which can also be virtual addresses as well) in order to simplify configurations.
  */
 @RegisterForReflection
 public class Address {
 
+  /**
+   * Channel name for representing virtual addresses.
+   */
   public static final String VIRTUAL_CHANNEL = "virtual";
 
   private final String channel;

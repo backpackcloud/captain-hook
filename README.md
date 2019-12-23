@@ -87,7 +87,7 @@ Why specifying a file? In a Kubernetes/OpenShift environment you might want to u
 
 #### Transmitter Type
 
-Back to the common Transmitter configuration, every configuration must include the key `type` so the Captain can pass the right command to the crew. You can have as much as Transmitters you need as long as they have different names.
+Back to the common Transmitter configuration, every configuration must include the key `type` so the Captain can pass the right command to the crew. You can have as much as Transmitters you need as long as they have different names. The only name restriction is `virtual` which is used internally to represent a virtual address (more on that later) and thus should not be used to create a Transmitter.
 
 #### Telegram
 

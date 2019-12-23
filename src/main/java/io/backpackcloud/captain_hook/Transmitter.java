@@ -31,6 +31,9 @@ import io.backpackcloud.captain_hook.transmitters.pushover.PushoverTransmitter;
 import io.backpackcloud.captain_hook.transmitters.slack.SlackTransmitter;
 import io.backpackcloud.captain_hook.transmitters.telegram.TelegramTransmitter;
 
+/**
+ * Interface that represents how a notification is delivered to its desintation.
+ */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = HTTPTransmitter.class, name = "http"),
@@ -40,8 +43,18 @@ import io.backpackcloud.captain_hook.transmitters.telegram.TelegramTransmitter;
 })
 public interface Transmitter {
 
+  /**
+   * Fires the notification to its destination.
+   *
+   * @param notification the notification to send
+   */
   void fire(Notification notification);
 
+  /**
+   * Checks if this transmitter is up and running. The liveness health check will call this method.
+   *
+   * @return {@code true} if this transmitter is up and running
+   */
   default boolean isUp() {
     return true;
   }

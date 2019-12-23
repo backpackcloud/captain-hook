@@ -27,14 +27,43 @@ package io.backpackcloud.captain_hook;
 import java.io.File;
 import java.util.Map;
 
+/**
+ * Interface that abstracts how a data type is serialized and deserialized.
+ */
 public interface Mapper {
 
+  /**
+   * Serializes the given object into a String.
+   *
+   * @param object the object to serialize
+   * @return the serialized object.
+   */
   String serialize(Object object);
 
+  /**
+   * Deserialize the given input into an object of the given class.
+   *
+   * @param input the input to deserialize
+   * @param type  the type of the result object
+   * @return the deserialized object.
+   */
   <E> E deserialize(String input, Class<E> type);
 
+  /**
+   * Deserialize the given file content into an object of the given class.
+   *
+   * @param file the file containing the input to deserialize
+   * @param type the type of the result object
+   * @return the deserialized object.
+   */
   <E> E deserialize(File file, Class<E> type);
 
+  /**
+   * Deserialize the given input into a generic Map of attributes.
+   *
+   * @param input the input to deserialize
+   * @return the deserialized object.
+   */
   default Map<String, ?> deserialize(String input) {
     return deserialize(input, Map.class);
   }
