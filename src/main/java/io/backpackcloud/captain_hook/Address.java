@@ -59,14 +59,36 @@ public class Address {
         .orElseThrow(UnbelievableException.because("Cannot create an address without an id"));
   }
 
+  /**
+   * Returns the channel of this addresses.
+   * <p>
+   * A channel references a {@link Transmitter} so this address is reached
+   * only if a transmitter for this channel is supplied.
+   * <p>
+   * Virtual addresses have a channel of {@link #VIRTUAL_CHANNEL}.
+   *
+   * @return the channel of this address.
+   */
   public String channel() {
     return this.channel;
   }
 
+  /**
+   * Returns the target of this address. The unique endpoint that can be reached
+   * through this address.
+   *
+   * @return the target of this address.
+   */
   public String id() {
     return this.id;
   }
 
+  /**
+   * Checks if this address has a virtual channel, which means it must be resolved
+   * with a {@link VirtualAddress}.
+   *
+   * @return {@code true} if this address is a virtual address.
+   */
   public boolean isVirtual() {
     return VIRTUAL_CHANNEL.equals(this.channel);
   }

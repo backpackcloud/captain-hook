@@ -30,6 +30,13 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * A virtual address is a short for one or more addresses. It encapsulates the full
+ * address so you don't need to specify a long address everywhere.
+ * <p>
+ * Virtual addresses can also point to another virtual address, but a notification
+ * can only be delivered if the end of the chain is an actual address.
+ */
 @RegisterForReflection
 public class VirtualAddress {
 
@@ -45,6 +52,11 @@ public class VirtualAddress {
     this(Collections.singletonList(address));
   }
 
+  /**
+   * Returns the list of addresses that are associated with this virtual address.
+   *
+   * @return the list of addresses that are associated with this virtual address.
+   */
   public List<Address> addresses() {
     return addresses;
   }

@@ -125,6 +125,11 @@ public class Crew {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Analyses the given webhook and produces events according to the orders defined by the captain.
+   * @param webhook the webhook to handle
+   * @return a list of the events raised by this webhook
+   */
   @Counted(name = "webhooks", description = "How many webhooks were received")
   public List<Event> handle(Webhook webhook) {
     logger.infov("Handling webhook");
@@ -140,8 +145,8 @@ public class Crew {
           return new Event(LabelSet.of(eventLabels),
               templateEngine.evaluate(mapping.name(), webhook.payload()),
               templateEngine.evaluate(mapping.message(), webhook.payload()),
-              templateEngine.evaluate(mapping.title(), webhook.payload()),
-              templateEngine.evaluate(mapping.url(), webhook.payload()));
+              templateEngine.evaluate(mapping.title().orElse(""), webhook.payload()),
+              templateEngine.evaluate(mapping.url().orElse(""), webhook.payload()));
         })
         .peek(this::handle)
         .collect(Collectors.toList());

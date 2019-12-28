@@ -69,24 +69,49 @@ public class Event {
     this.url = url;
   }
 
+  /**
+   * Returns the labels attached to this event.
+   *
+   * @return the labels attached to this event.
+   */
   public LabelSet labels() {
     return this.labels;
   }
 
+  /**
+   * Returns the name of this event.
+   *
+   * @return the name of this event.
+   */
   public String name() {
     return this.name;
   }
 
+  /**
+   * Returns the message of this event.
+   *
+   * @return the message of this event.
+   */
   public String message() {
     return message;
   }
 
-  public String title() {
-    return title;
+  /**
+   * Return the title of this event. May be {@code null}.
+   *
+   * @return the title of this event.
+   */
+  public Optional<String> title() {
+    return Optional.ofNullable(title);
   }
 
-  public String url() {
-    return url;
+  /**
+   * Return the url of this event. May be {@code null}.
+   *
+   * @return the url of this event.
+   */
+  public Optional<String> url() {
+    return Optional.ofNullable(url);
   }
 
   @Override

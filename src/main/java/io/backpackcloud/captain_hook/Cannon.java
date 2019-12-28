@@ -30,19 +30,26 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.Map;
 
+/**
+ * Component responsible for firing notifications using transmitters as powder.
+ */
 @ApplicationScoped
 public class Cannon {
 
   private final Map<String, Transmitter> transmitters;
 
+  public Cannon(Map<String, Transmitter> transmitters) {
+    this.transmitters = transmitters;
+  }
+
   @Inject
   public Cannon(CaptainHook captainHook) {
-    transmitters = captainHook.transmitters();
+    this(captainHook.transmitters());
   }
 
   @ConsumeEvent("fire")
   public void fire(Notification notification) {
-    transmitters.getOrDefault(notification.destination().channel(), n -> { })
+    transmitters.getOrDefault(notification.destination().channel(), n -> {})
         .fire(notification);
   }
 

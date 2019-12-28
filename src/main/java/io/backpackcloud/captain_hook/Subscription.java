@@ -33,7 +33,7 @@ import java.util.Optional;
 /**
  * Represents a subscription for an event.
  * <p>
- * Subscriptions bind events to addresses allowing to create outcome messages
+ * Subscriptions bind events to addresses allowing to create notifications.
  */
 @RegisterForReflection
 public class Subscription {
@@ -55,6 +55,12 @@ public class Subscription {
     this.priority = priority;
   }
 
+  /**
+   * Checks if this subscription matches the given event.
+   *
+   * @param event the event to check.
+   * @return {@code true} if this subscription matches the given event.
+   */
   public boolean matches(Event event) {
     if (name != null && !name.equals(event.name())) {
       return false;
@@ -62,9 +68,15 @@ public class Subscription {
     return selector.test(event.labels());
   }
 
+  /**
+   * Analyzes the given event and produces a notification if it matches this event.
+   *
+   * @param event the event to analyze
+   * @return an optional notification if this subscription matches the given event.
+   */
   public Optional<Notification> yield(Event event) {
     if (matches(event))
-      return Optional.of(new Notification(event.title(), event.message(), event.url(), destination, priority));
+      return Optional.of(new Notification(event, destination, priority));
     else return Optional.empty();
   }
 

@@ -32,6 +32,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Represents a notification that might be delivered by the crew.
+ */
 @RegisterForReflection
 public class Notification {
 
@@ -60,30 +63,84 @@ public class Notification {
     this.priority = Optional.ofNullable(priority).orElse(Priority.NORMAL);
   }
 
+  public Notification(Event event, Address destination, Priority priority) {
+    this.title = event.title().orElse(null);
+    this.message = event.message();
+    this.url = event.url().orElse(null);
+    this.destination = Optional.ofNullable(destination)
+        .orElseThrow(UnbelievableException.because("Cannot create a notification without a destination"));
+    this.priority = Optional.ofNullable(priority).orElse(Priority.NORMAL);
+  }
+
+  /**
+   * Returns the message of this notification.
+   *
+   * @return the message of this notification.
+   */
   public String message() {
     return message;
   }
 
+  /**
+   * Returns the optional title of this notification.
+   *
+   * @return the optional title of this notification.
+   */
   public Optional<String> title() {
     return Optional.ofNullable(title);
   }
 
+  /**
+   * Returns the optional url of this notification.
+   *
+   * @return the optional url of this notification.
+   */
   public Optional<String> url() {
     return Optional.ofNullable(url);
   }
 
+  /**
+   * Returns the address which this notification should be delivered.
+   *
+   * @return the destination of this notification.
+   */
   public Address destination() {
     return destination;
   }
 
+  /**
+   * Returns the target of this notification. The same as {@code destination().id()}.
+   *
+   * @return the target of this notification.
+   */
+  public String target() {
+    return destination.id();
+  }
+
+  /**
+   * Returns the priority of this notification.
+   *
+   * @return the priority of this notification.
+   */
   public Priority priority() {
     return priority;
   }
 
+  /**
+   * Creates a new notification by changing the destination to the given value.
+   *
+   * @param newAddress the new destination
+   * @return a new notification based on this one but for the given destination.
+   */
   public Notification changeAddress(Address newAddress) {
     return new Notification(title, message, url, newAddress, priority);
   }
 
+  /**
+   * Returns a context map of variables for using in templates.
+   *
+   * @return a context map containing the attributes of this notification.
+   */
   public Map<String, ?> context() {
     Map<String, Object> context = new HashMap<>();
     context.put("title", title);

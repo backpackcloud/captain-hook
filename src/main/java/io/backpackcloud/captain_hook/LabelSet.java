@@ -32,7 +32,6 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -64,32 +63,12 @@ public class LabelSet {
   }
 
   /**
-   * Checks if this data contains another data. Useful to implement selectors
-   * based on data's values.
+   * Checks if this label set is empty.
    *
-   * @param other the data to check against this instance.
-   * @return {@code true} if this data contains all the values on the given data.
+   * @return {@code true} if there are no labels in this set, {@code false} otherwise.
    */
-  public boolean contains(LabelSet other) {
-    return other.values.entrySet().stream()
-        .allMatch(s -> this.values.containsKey(s.getKey())
-            && Objects.equals(s.getValue(), this.values.get(s.getKey())));
-  }
-
   public boolean isEmpty() {
     return this.values.isEmpty();
-  }
-
-  /**
-   * Creates a new data object without the specific data label.
-   *
-   * @param name the label to remove from the new data
-   * @return a new data object without the given label.
-   */
-  public LabelSet without(String name) {
-    Map<String, String> newValues = new HashMap<>(this.values);
-    newValues.remove(name);
-    return new LabelSet(newValues);
   }
 
   /**
