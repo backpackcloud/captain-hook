@@ -22,34 +22,31 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook;
+package io.backpackcloud.captain_hook.transmitters.telegram;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public enum Priority {
+/**
+ * Represents a Telegram Message that can be sent through a {@link TelegramService}.
+ */
+public class TelegramMessage {
 
-  LOW(-1), NORMAL(0), HIGH(1);
+  private final String chatId;
+  private final String text;
 
-  private final int value;
-
-  Priority(int value) {
-    this.value = value;
+  public TelegramMessage(String chatId, String text) {
+    this.chatId = chatId;
+    this.text = text;
   }
 
-  public int value() {
-    return value;
+  @JsonProperty("chat_id")
+  public String chatId() {
+    return chatId;
   }
 
-  @JsonValue
-  @Override
-  public String toString() {
-    return name().toLowerCase();
-  }
-
-  @JsonCreator
-  public static Priority get(String priority) {
-    return Priority.valueOf(priority.toUpperCase());
+  @JsonProperty("text")
+  public String text() {
+    return text;
   }
 
 }

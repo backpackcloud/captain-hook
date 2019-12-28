@@ -26,7 +26,7 @@ package io.backpackcloud.captain_hook.transmitters.telegram;
 
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
-import javax.ws.rs.FormParam;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -43,11 +43,11 @@ public interface TelegramService {
    *
    * @param botToken the token of the bot that will send a message
    * @param message  the message to send
-   * @param target   the chat_id that will receive the message
    */
   @POST
   @Path("/bot{token}/sendMessage")
-  void send(@PathParam("token") String botToken, @FormParam("text") String message, @FormParam("chat_id") String target);
+  @Consumes("application/json")
+  void send(@PathParam("token") String botToken, TelegramMessage message);
 
   @GET
   @Path("/bot{token}/getMe")

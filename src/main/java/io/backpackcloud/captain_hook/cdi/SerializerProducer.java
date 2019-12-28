@@ -36,6 +36,7 @@ import io.backpackcloud.captain_hook.Mapper;
 import io.backpackcloud.captain_hook.Serializer;
 import io.backpackcloud.captain_hook.TemplateEngine;
 import io.backpackcloud.captain_hook.UnbelievableException;
+import io.backpackcloud.captain_hook.transmitters.pushover.PushoverService;
 import io.backpackcloud.captain_hook.transmitters.telegram.TelegramService;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -84,10 +85,13 @@ public class SerializerProducer {
 
   @Singleton
   @Produces
-  public Serializer get(TemplateEngine templateEngine, @RestClient TelegramService telegramService) {
+  public Serializer get(TemplateEngine templateEngine,
+                        @RestClient TelegramService telegramService,
+                        @RestClient PushoverService pushoverService) {
     values.addValue("serializer", serializer);
     values.addValue("templateEngine", templateEngine);
     values.addValue("telegramService", telegramService);
+    values.addValue("pushoverService", pushoverService);
     return serializer;
   }
 

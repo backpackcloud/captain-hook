@@ -22,34 +22,20 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook;
+package io.backpackcloud.captain_hook.transmitters.pushover;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
-public enum Priority {
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
 
-  LOW(-1), NORMAL(0), HIGH(1);
+@RegisterRestClient
+public interface PushoverService {
 
-  private final int value;
-
-  Priority(int value) {
-    this.value = value;
-  }
-
-  public int value() {
-    return value;
-  }
-
-  @JsonValue
-  @Override
-  public String toString() {
-    return name().toLowerCase();
-  }
-
-  @JsonCreator
-  public static Priority get(String priority) {
-    return Priority.valueOf(priority.toUpperCase());
-  }
+  @POST
+  @Path("/1/messages.json")
+  @Consumes("application/json")
+  void send(PushoverNotification notification);
 
 }

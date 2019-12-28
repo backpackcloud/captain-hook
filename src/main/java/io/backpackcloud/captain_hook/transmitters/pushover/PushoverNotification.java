@@ -22,34 +22,56 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook;
+package io.backpackcloud.captain_hook.transmitters.pushover;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public enum Priority {
+public class PushoverNotification {
 
-  LOW(-1), NORMAL(0), HIGH(1);
+  private final String token;
+  private final String user;
+  private final String message;
+  private final String title;
+  private final String url;
+  private final int priority;
 
-  private final int value;
-
-  Priority(int value) {
-    this.value = value;
+  public PushoverNotification(String token, String user, String message, String title, String url, int priority) {
+    this.token = token;
+    this.user = user;
+    this.message = message;
+    this.title = title;
+    this.url = url;
+    this.priority = priority;
   }
 
-  public int value() {
-    return value;
+  @JsonProperty
+  public String token() {
+    return token;
   }
 
-  @JsonValue
-  @Override
-  public String toString() {
-    return name().toLowerCase();
+  @JsonProperty
+  public String user() {
+    return user;
   }
 
-  @JsonCreator
-  public static Priority get(String priority) {
-    return Priority.valueOf(priority.toUpperCase());
+  @JsonProperty
+  public String message() {
+    return message;
+  }
+
+  @JsonProperty
+  public String title() {
+    return title;
+  }
+
+  @JsonProperty
+  public String url() {
+    return url;
+  }
+
+  @JsonProperty
+  public int priority() {
+    return priority;
   }
 
 }

@@ -24,51 +24,46 @@
 
 package io.backpackcloud.captain_hook.transmitters.pushover;
 
+import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.backpackcloud.captain_hook.Notification;
 import io.backpackcloud.captain_hook.SensitiveValue;
 import io.backpackcloud.captain_hook.Transmitter;
-import kong.unirest.Empty;
-import kong.unirest.HttpResponse;
-import kong.unirest.Unirest;
 import org.jboss.logging.Logger;
 
-import java.util.concurrent.CompletableFuture;
+import javax.ws.rs.WebApplicationException;
 
 public class PushoverTransmitter implements Transmitter {
 
   private static final Logger logger = Logger.getLogger(PushoverTransmitter.class);
 
   private final String token;
-
-  private boolean error;
+  private final PushoverService pushoverService;
 
   @JsonCreator
-  public PushoverTransmitter(@JsonProperty("token") SensitiveValue token) {
+  public PushoverTransmitter(@JsonProperty("token") SensitiveValue token,
+                             @JacksonInject("pushoverService") PushoverService pushoverService) {
     this.token = token.value();
+    this.pushoverService = pushoverService;
   }
 
   @Override
   public void fire(Notification notification) {
-    logger.infov("Sending pushover notification to: {0}", notification.destination().id());
-    CompletableFuture<HttpResponse<Empty>> future = Unirest
-        .post("https://api.pushover.net/1/messages.json")
-        .field("token", token)
-        .field("user", notification.destination().id())
-        .field("title", notification.title().orElse(""))
-        .field("url", notification.url().orElse(""))
-        .field("message", notification.message())
-        // normal priority value is 0 for pushover
-        .field("priority", String.valueOf(notification.priority().relativeValue(0)))
-        .asEmptyAsync();
-    future.whenCompleteAsync(
-        (response, exception) -> error = 400 <= response.getStatus() && response.getStatus() < 600);
-  }
-
-  @Override
-  public boolean isUp() {
-    return !error;
+    logger.infov("Sending notification to: {0}", notification.target());
+    PushoverNotification pushoverNotification = new PushoverNotification(
+        token,
+        notification.target(),
+        notification.message(),
+        notification.title().orElse(null),
+        notification.url().orElse(null),
+        notification.priority().value()
+    );
+    try {
+      pushoverService.send(pushoverNotification);
+    } catch (WebApplicationException e) {
+      logger.errorv(e, "Got HTTP Status {0} while sending pushover notification", e.getResponse().getStatus());
+    }
   }
 
 }
