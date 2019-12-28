@@ -119,19 +119,6 @@ transmitters:
       value: lanrbhgjaiou4872yuijuqy68f7uhiadyg78u3
 ```
 
-#### Slack
-
-Slack is widely used as a collaboration hub and it supports bots as well. Captain kinda needs to support it so all it needs is `slack` as `type`, a sensitive input as `token` and an optional `username` in case you wanna use your bot name.
-
-```yaml
-transmitters:
-  ship_workspace:
-    type: slack
-    username: Peter Bot
-    token:
-      value: lanrbhgjaiou4872yuijuqy68f7uhiadyg78u3
-```
-
 #### HTTP
 
 You can also uses a generic http call to forward the notification. What's the catch here? The payload is not customizable. Remember: Captain only cares about delivering notifications, integration between systems is not the focus on this ship.
@@ -178,10 +165,10 @@ subscriptions:
   # any event of name test will be sent to the virtual address test
 - name: test
   destination: test
-  # any event with the label from=nexus will be sent to the slack:devs address
+  # any event with the label from=nexus will be sent to the telegram:devs address
 - selector:
     from: nexus
-  destination: slack:devs
+  destination: telegram:devs
   # any event will be sent to the dump virtual address
 - destination: dump
 ```

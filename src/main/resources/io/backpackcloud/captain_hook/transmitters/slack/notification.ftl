@@ -1,3 +1,0 @@
-${(title)!}
-${message}
-${(url)!}
