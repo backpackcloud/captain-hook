@@ -51,6 +51,7 @@
     <unirest-java.version>3.3.00</unirest-java.version>
     <kodo.version>4.0.0</kodo.version>
     <freemarker.version>2.3.29</freemarker.version>
+    <mockito-core.version>3.2.4</mockito-core.version>
   </properties>
 
   <dependencyManagement>
@@ -84,6 +85,11 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy-jackson</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-rest-client</artifactId>
     </dependency>
 
     <dependency>
@@ -135,6 +141,13 @@
       <groupId>io.backpackcloud</groupId>
       <artifactId>kodo</artifactId>
       <version>${kodo.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${mockito-core.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

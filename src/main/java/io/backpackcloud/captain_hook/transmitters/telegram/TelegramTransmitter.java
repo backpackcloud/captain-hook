@@ -31,39 +31,50 @@ import io.backpackcloud.captain_hook.Notification;
 import io.backpackcloud.captain_hook.SensitiveValue;
 import io.backpackcloud.captain_hook.TemplateEngine;
 import io.backpackcloud.captain_hook.Transmitter;
-import kong.unirest.Unirest;
+import io.backpackcloud.captain_hook.UnbelievableException;
+import org.jboss.logging.Logger;
 
 import java.util.Optional;
 
 public class TelegramTransmitter implements Transmitter {
 
+  private static final Logger logger = Logger.getLogger(TelegramTransmitter.class);
+
   private final String token;
   private final String template;
   private final TemplateEngine templateEngine;
+  private final TelegramService telegramService;
 
   @JsonCreator
   public TelegramTransmitter(@JsonProperty("token") SensitiveValue token,
                              @JsonProperty("template") String template,
-                             @JacksonInject("templateEngine") TemplateEngine templateEngine) {
+                             @JacksonInject("templateEngine") TemplateEngine templateEngine,
+                             @JacksonInject("telegramService") TelegramService telegramService) {
     this.token = token.value();
     this.template = Optional.ofNullable(template).orElse("telegram/notification.ftl");
     this.templateEngine = templateEngine;
+    this.telegramService = telegramService;
   }
 
   @Override
   public void fire(Notification notification) {
-    Unirest.post("https://api.telegram.org/bot{token}/sendMessage")
-        .routeParam("token", token)
-        .field("chat_id", notification.destination().id())
-        .field("text", templateEngine.evaluate(template, notification.context()))
-        .asEmptyAsync();
+    logger.infov("Sending message to {0}", notification.target());
+    try {
+      telegramService.send(token, templateEngine.evaluate(template, notification.context()), notification.target());
+    } catch (Exception e) {
+      logger.error("Error while sending message", e);
+      throw new UnbelievableException(e);
+    }
   }
 
   public boolean isUp() {
-    return Unirest.post("https://api.telegram.org/bot{token}/getMe")
-        .routeParam("token", this.token)
-        .asEmpty()
-        .isSuccess();
+    try {
+      TelegramResponse<User> result = telegramService.getMe(token);
+      return result.ok();
+    } catch (Exception e) {
+      logger.error("Error while checking transmitter", e);
+      return false;
+    }
   }
 
 }
