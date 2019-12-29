@@ -33,6 +33,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import io.backpackcloud.captain_hook.Mapper;
+import io.backpackcloud.captain_hook.Plank;
 import io.backpackcloud.captain_hook.Serializer;
 import io.backpackcloud.captain_hook.TemplateEngine;
 import io.backpackcloud.captain_hook.UnbelievableException;
@@ -87,11 +88,13 @@ public class SerializerProducer {
   @Produces
   public Serializer get(TemplateEngine templateEngine,
                         @RestClient TelegramService telegramService,
-                        @RestClient PushoverService pushoverService) {
+                        @RestClient PushoverService pushoverService,
+                        Plank plank) {
     values.addValue("serializer", serializer);
     values.addValue("templateEngine", templateEngine);
     values.addValue("telegramService", telegramService);
     values.addValue("pushoverService", pushoverService);
+    values.addValue("plank", plank);
     return serializer;
   }
 

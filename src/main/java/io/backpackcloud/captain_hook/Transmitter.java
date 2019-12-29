@@ -28,8 +28,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.backpackcloud.captain_hook.transmitters.http.HTTPTransmitter;
 import io.backpackcloud.captain_hook.transmitters.pushover.PushoverTransmitter;
-import io.backpackcloud.captain_hook.transmitters.slack.SlackTransmitter;
 import io.backpackcloud.captain_hook.transmitters.telegram.TelegramTransmitter;
+import io.backpackcloud.captain_hook.transmitters.virtual.VirtualAddressTransmitter;
 
 /**
  * Interface that represents how a notification is delivered to its desintation.
@@ -39,7 +39,7 @@ import io.backpackcloud.captain_hook.transmitters.telegram.TelegramTransmitter;
     @JsonSubTypes.Type(value = HTTPTransmitter.class, name = "http"),
     @JsonSubTypes.Type(value = PushoverTransmitter.class, name = "pushover"),
     @JsonSubTypes.Type(value = TelegramTransmitter.class, name = "telegram"),
-    @JsonSubTypes.Type(value = SlackTransmitter.class, name = "slack")
+    @JsonSubTypes.Type(value = VirtualAddressTransmitter.class, name = "virtual")
 })
 public interface Transmitter {
 

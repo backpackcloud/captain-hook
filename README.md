@@ -141,20 +141,31 @@ If the `url` contains `{destination}`, it will be replaced by the subscriber's i
 
 And what about the payload? It's a JSON representation of the `Notification` object.
 
-### Virtual Addresses
+#### Virtual
 
 Virtual addresses can be used to shorten an address or to group multiple ones. If you often type `my_chat:my-user` you can short it to something like `me` and map it to that address.
 
+The Virtual Address transmitter allows you to create virtual addresses and 
+
 ```yaml
-virtual_addresses:
-  # the key can have the same name as a transmitter
-  pushover: pushover:my-long-pushover-key
-  my_telegram: telegram:99999999
-  # you can have more than one address pointing to the same virtual address
-  test:
-  - pushover
-  - my_telegram
+transmitters:
+  virtual:
+    type: virtual
+    addresses:
+      # the key can have the same name as a transmitter
+      pushover: pushover:my-long-pushover-key
+      my_telegram: telegram:99999999
+      # you can have more than one address pointing to the same virtual address
+      test:
+      - virtual:pushover
+      - virtual:my_telegram
 ```
+
+### The Default Transmitter
+
+If you create a transmitter named `default`, it will be used to handle addresses without specifying the channel. So when you subscribe the address `my_team` it will be converted to `default:my_team` and the `default` transmitter will be used.
+
+A good tip is to define a `virtual` transmitter as the default one so you can use virtual addresses by default and keep your configuration clean.
 
 ### Subscriptions
 

@@ -22,9 +22,10 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook;
+package io.backpackcloud.captain_hook.transmitters.virtual;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.backpackcloud.captain_hook.Address;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import java.util.Collections;

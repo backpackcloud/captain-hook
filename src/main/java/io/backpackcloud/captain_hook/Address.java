@@ -37,17 +37,9 @@ import java.util.Optional;
  * Address are structured in two parts: a channel and an id. A channel
  * maps to a {@link Transmitter} so only that transmitter knows how to
  * reach to the given id.
- * <p>
- * An address can also be virtual, which means it points to one or more addresses
- * (which can also be virtual addresses as well) in order to simplify configurations.
  */
 @RegisterForReflection
 public class Address {
-
-  /**
-   * Channel name for representing virtual addresses.
-   */
-  public static final String VIRTUAL_CHANNEL = "virtual";
 
   private final String channel;
   private final String id;
@@ -64,8 +56,6 @@ public class Address {
    * <p>
    * A channel references a {@link Transmitter} so this address is reached
    * only if a transmitter for this channel is supplied.
-   * <p>
-   * Virtual addresses have a channel of {@link #VIRTUAL_CHANNEL}.
    *
    * @return the channel of this address.
    */
@@ -81,16 +71,6 @@ public class Address {
    */
   public String id() {
     return this.id;
-  }
-
-  /**
-   * Checks if this address has a virtual channel, which means it must be resolved
-   * with a {@link VirtualAddress}.
-   *
-   * @return {@code true} if this address is a virtual address.
-   */
-  public boolean isVirtual() {
-    return VIRTUAL_CHANNEL.equals(this.channel);
   }
 
   @Override
@@ -118,7 +98,7 @@ public class Address {
     if (string == null || string.isEmpty()) {
       throw new UnbelievableException("Cannot create an address with an empty string");
     }
-    String channel = VIRTUAL_CHANNEL;
+    String channel = "default";
     String id = string;
 
     String[] split = string.split(":", 2);

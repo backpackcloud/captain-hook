@@ -46,18 +46,14 @@ public class CaptainHook {
 
   private final List<WebhookMapping> webhooks;
 
-  private final Map<String, VirtualAddress> virtualAddresses;
-
   private final Map<String, Transmitter> transmitters;
 
   @JsonCreator
   public CaptainHook(@JsonProperty("subscriptions") List<Subscription> subscriptions,
                      @JsonProperty("webhooks") List<WebhookMapping> webhooks,
-                     @JsonProperty("virtual_addresses") Map<String, VirtualAddress> virtualAddresses,
                      @JsonProperty("transmitters") Map<String, Transmitter> transmitters) {
     this.subscriptions = subscriptions;
     this.webhooks = webhooks;
-    this.virtualAddresses = virtualAddresses;
     this.transmitters = transmitters;
   }
 
@@ -67,10 +63,6 @@ public class CaptainHook {
 
   public List<WebhookMapping> webhooks() {
     return Collections.unmodifiableList(webhooks);
-  }
-
-  public Map<String, VirtualAddress> virtualAddresses() {
-    return Collections.unmodifiableMap(virtualAddresses);
   }
 
   public Map<String, Transmitter> transmitters() {

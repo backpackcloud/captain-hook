@@ -22,21 +22,35 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook.transmitters.pushover;
+package io.backpackcloud.captain_hook.transmitters.virtual;
 
-import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import com.fasterxml.jackson.annotation.JacksonInject;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.backpackcloud.captain_hook.Notification;
+import io.backpackcloud.captain_hook.Plank;
+import io.backpackcloud.captain_hook.Transmitter;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+import java.util.Map;
 
-@RegisterRestClient
-@Path("/1")
-public interface PushoverService {
+public class VirtualAddressTransmitter implements Transmitter {
 
-  @POST
-  @Path("/messages.json")
-  @Consumes("application/json")
-  void send(PushoverNotification notification);
+  private final Map<String, VirtualAddress> virtualAddresses;
+  private final Plank plank;
+
+  @JsonCreator
+  public VirtualAddressTransmitter(@JsonProperty("addresses") Map<String, VirtualAddress> virtualAddresses,
+                                   @JacksonInject("plank") Plank plank) {
+    this.virtualAddresses = virtualAddresses;
+    this.plank = plank;
+  }
+
+  @Override
+  public void fire(Notification notification) {
+    VirtualAddress virtualAddress = virtualAddresses.getOrDefault(notification.target(), VirtualAddress.NULL);
+    virtualAddress.addresses().stream()
+        .map(notification::changeAddress)
+        .forEach(plank::walk);
+  }
 
 }

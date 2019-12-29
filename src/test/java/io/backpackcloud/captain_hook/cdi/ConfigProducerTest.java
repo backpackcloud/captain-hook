@@ -43,7 +43,7 @@ public class ConfigProducerTest {
 
   String somePath = "/some/path";
   CaptainHook captainHook = new CaptainHook(
-      Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap()
+      Collections.emptyList(), Collections.emptyList(), Collections.emptyMap()
   );
 
   Serializer serializer = mock(Serializer.class, Answers.RETURNS_MOCKS);

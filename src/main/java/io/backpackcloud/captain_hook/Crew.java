@@ -25,7 +25,6 @@
 package io.backpackcloud.captain_hook;
 
 import io.backpackcloud.captain_hook.api.JollyRoger;
-import io.vertx.axle.core.eventbus.EventBus;
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.jboss.logging.Logger;
 
@@ -54,58 +53,33 @@ public class Crew {
 
   private final TemplateEngine templateEngine;
 
-  private final EventBus eventBus;
+  private final Plank plank;
 
   /**
    * The crew needs the orders from the Captain in order
    *
    * @param captainHook    the orders from the captain so the crew can obey
    * @param templateEngine the template engine for parsing webhooks
-   * @param eventBus       the event bus to use
+   * @param plank          the plank to walk notifications
    */
   @Inject
-  public Crew(CaptainHook captainHook, TemplateEngine templateEngine, EventBus eventBus) {
+  public Crew(CaptainHook captainHook, TemplateEngine templateEngine, Plank plank) {
     this.captainHook = captainHook;
     this.templateEngine = templateEngine;
-    this.eventBus = eventBus;
+    this.plank = plank;
   }
 
   /**
-   * Handles a notification that comes aboard, resolving virtual addresses
-   * as needed.
+   * Handles a notification that comes aboard.
    *
    * @param notification the notification for delivery
    */
-  public void handle(Notification notification) {
-    if (notification.destination().isVirtual()) {
-      VirtualAddress virtualAddress = captainHook.virtualAddresses()
-          .getOrDefault(notification.destination().id(), VirtualAddress.NULL);
-      for (Address newAddress : virtualAddress.addresses()) {
-        if (notification.destination().equals(newAddress)) {
-          throw new UnbelievableException("Cannot redirect to the same address");
-        }
-        handle(notification.changeAddress(newAddress));
-      }
-    } else {
-      if (captainHook.transmitters().containsKey(notification.destination().channel())) {
-        deliver(notification);
-      }
-    }
-  }
-
-  /**
-   * Delivers the notification. It doesn't resolve virtual addresses nor addresses without
-   * transmitters available.
-   * <p>
-   * Captain Hook ordered the crew to count the actual delivers so that's why this
-   * method is here.
-   *
-   * @param notification the notification to fire
-   */
   @Counted(name = "notifications", description = "How many notifications were fired")
-  public void deliver(Notification notification) {
-    logger.infov("Delivering notification for {0}", notification.destination());
-    eventBus.sender("fire").write(notification);
+  public void handle(Notification notification) {
+    if (captainHook.transmitters().containsKey(notification.destination().channel())) {
+      logger.infov("Delivering notification for {0}", notification.destination());
+      plank.walk(notification);
+    }
   }
 
   /**
@@ -127,6 +101,7 @@ public class Crew {
 
   /**
    * Analyses the given webhook and produces events according to the orders defined by the captain.
+   *
    * @param webhook the webhook to handle
    * @return a list of the events raised by this webhook
    */

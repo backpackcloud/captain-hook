@@ -47,7 +47,7 @@ public class Cannon {
     this(captainHook.transmitters());
   }
 
-  @ConsumeEvent("fire")
+  @ConsumeEvent(Plank.NOTIFICATION_WALKED)
   public void fire(Notification notification) {
     transmitters.getOrDefault(notification.destination().channel(), n -> {})
         .fire(notification);

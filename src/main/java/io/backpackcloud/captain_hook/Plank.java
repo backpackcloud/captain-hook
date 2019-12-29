@@ -22,21 +22,12 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook.transmitters.pushover;
+package io.backpackcloud.captain_hook;
 
-import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+public interface Plank {
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+  String NOTIFICATION_WALKED = "notification_walked";
 
-@RegisterRestClient
-@Path("/1")
-public interface PushoverService {
-
-  @POST
-  @Path("/messages.json")
-  @Consumes("application/json")
-  void send(PushoverNotification notification);
+  void walk(Notification notification);
 
 }

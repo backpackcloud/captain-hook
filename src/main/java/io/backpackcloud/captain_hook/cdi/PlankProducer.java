@@ -22,21 +22,20 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook.transmitters.pushover;
+package io.backpackcloud.captain_hook.cdi;
 
-import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import io.backpackcloud.captain_hook.Plank;
+import io.vertx.axle.core.eventbus.EventBus;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+import javax.enterprise.inject.Produces;
+import javax.inject.Singleton;
 
-@RegisterRestClient
-@Path("/1")
-public interface PushoverService {
+public class PlankProducer {
 
-  @POST
-  @Path("/messages.json")
-  @Consumes("application/json")
-  void send(PushoverNotification notification);
+  @Produces
+  @Singleton
+  public Plank get(EventBus eventBus) {
+    return notification -> eventBus.sender(Plank.NOTIFICATION_WALKED).write(notification);
+  }
 
 }
