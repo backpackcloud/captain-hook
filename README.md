@@ -34,7 +34,8 @@ A Notification is the result of attaching an Event, to an Address. It contains:
 - `message`: the message that describes this event, used for notifications
 - `url` (optional): a url that contains more information about this event, used for notifications as well
 - `destination`: contains the address that should receive the notification
-- `priority`: the priority of this notification (`low`, `normal` or `high`)
+- `priority`: the priority of this notification (`low (-1)`, `normal (0)` or `high (+1)`)
+- `labels` (optional): a set of labels that adds more context to the notification
 
 Addresses are composed by a channel name and a target destination. On top of that, Transmitters are responsible for reaching the address to deliver the notification.
 
@@ -298,3 +299,7 @@ This example will raise an event every time a GitLab push hook is received. Sinc
 ```
 
 With this example, every event from gitlab will notify the `pushover_gitlab` address but, if the event is also for a push on the `master` branch of the `captain_hook` project, the event will also notify the `captain_hook_team` virtual address.
+
+## API Endpoints
+
+TODO
