@@ -53,7 +53,10 @@ public class Notification {
   @JsonProperty
   private final Priority priority;
 
-  public Notification(String title, String message, String url, Address destination, Priority priority) {
+  @JsonProperty
+  private final LabelSet labels;
+
+  public Notification(String title, String message, String url, Address destination, Priority priority, LabelSet labels) {
     this.title = title;
     this.message = Optional.ofNullable(message)
         .orElseThrow(UnbelievableException.because("Cannot create a notification without a message"));
@@ -61,6 +64,7 @@ public class Notification {
     this.destination = Optional.ofNullable(destination)
         .orElseThrow(UnbelievableException.because("Cannot create a notification without a destination"));
     this.priority = Optional.ofNullable(priority).orElse(Priority.NORMAL);
+    this.labels = labels;
   }
 
   public Notification(Event event, Address destination, Priority priority) {
@@ -70,6 +74,7 @@ public class Notification {
     this.destination = Optional.ofNullable(destination)
         .orElseThrow(UnbelievableException.because("Cannot create a notification without a destination"));
     this.priority = Optional.ofNullable(priority).orElse(Priority.NORMAL);
+    this.labels = event.labels();
   }
 
   /**
@@ -126,6 +131,10 @@ public class Notification {
     return priority;
   }
 
+  public LabelSet labels() {
+    return labels;
+  }
+
   /**
    * Creates a new notification by changing the destination to the given value.
    *
@@ -133,7 +142,7 @@ public class Notification {
    * @return a new notification based on this one but for the given destination.
    */
   public Notification changeAddress(Address newAddress) {
-    return new Notification(title, message, url, newAddress, priority);
+    return new Notification(title, message, url, newAddress, priority, labels);
   }
 
   /**
@@ -149,6 +158,7 @@ public class Notification {
     context.put("destination", destination);
     context.put("priority", priority);
     context.put("target", target());
+    context.put("labels", labels.values());
     return context;
   }
 
