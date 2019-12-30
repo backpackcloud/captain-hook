@@ -111,17 +111,17 @@ public class Crew {
     return captainHook.webhooks().stream()
         .filter(mapping -> mapping.matches(webhook))
         .map(WebhookMapping::event)
-        .map(mapping -> {
+        .map(eventMapping -> {
           Map<String, String> eventLabels = new HashMap<>();
 
-          mapping.labels().values()
+          eventMapping.labels().values()
               .forEach((key, value) -> eventLabels.put(key, templateEngine.evaluate(value, webhook.payload())));
 
           return new Event(LabelSet.of(eventLabels),
-              templateEngine.evaluate(mapping.name(), webhook.payload()),
-              templateEngine.evaluate(mapping.message(), webhook.payload()),
-              templateEngine.evaluate(mapping.title().orElse(""), webhook.payload()),
-              templateEngine.evaluate(mapping.url().orElse(""), webhook.payload()));
+              templateEngine.evaluate(eventMapping.name(), webhook.payload()),
+              templateEngine.evaluate(eventMapping.message(), webhook.payload()),
+              templateEngine.evaluate(eventMapping.title().orElse(""), webhook.payload()),
+              templateEngine.evaluate(eventMapping.url().orElse(""), webhook.payload()));
         })
         .peek(this::handle)
         .collect(Collectors.toList());
