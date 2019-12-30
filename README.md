@@ -127,28 +127,72 @@ In case you wanna use the HTTP Transmitter, let Captain know, besides `http` as 
 
 - `url`: the actual url that will receive the notification
 - `headers`: the map containing any additional headers
-- `payload`: the payload definition
+- `payload`: the payload definition that will be sent
 
 ```yaml
 transmitters:
   my_awesome_receiver:
     type: http
-    url: https://my.endpoint.integration/{destination}
+    url: https://my.endpoint.integration/${target}
     headers:
       from: captain-hook
     payload:
       message: ${message}
 ```
 
-If the `url` contains `{destination}`, it will be replaced by the subscriber's id.
+Notice that any value can be evaluated as a template, even the headers. The payload will be sent as JSON.
 
-Notice that any value can be evaluated as a template, even the headers.
+This transmitter is good if you need to separate the notification at the endpoint. You could easily create one for Telegram, Pushover, Slack of any of those platforms that offers a web api.
+
+```yaml
+transmitters:
+  telegram:
+    type: http
+    url: https://api.telegram.org/botYOUR_BOT_TOKEN_HERE/sendMessage
+    payload:
+      chat_id: ${target}
+      text: ${message}
+  pushover:
+    type: http
+    url: https://api.pushover.net/1/messages.json
+    payload:
+      token: YOUR_TOKEN
+      user: ${target}
+      message: ${message}
+      title: ${title}
+```
+
+#### Router
+
+In case you just need to route a notification to an endpoint, you can use a `router` Transmitter. This transmitter will use full url's as targets and the same configuration options as the HTTP transmitter for each route:
+
+```yaml
+transmitters:
+  to:
+    type: router
+    routes:
+      requestbin:
+        url: https://YOUR_REQUEST_BIN_ID.x.pipedream.net
+        payload:
+          notification:
+            message: ${message}
+            title: ${title}
+            url: ${url}
+      telegram:
+        url: https://api.telegram.org/botYOUR_BOT_TOKEN/sendMessage
+        payload:
+          # sends every notification to this chat id (private or group)
+          chat_id: YOUR_CHAT_ID
+          text: ${message}
+```
+
+In this example, you could only refer to the address `to:requestbin` and the notification will be sent to your RequestBin endpoint. Following the same logic, using the address `to:telegram` will send notifications to the specified Telegram chat.
 
 #### Virtual
 
 Virtual addresses can be used to shorten an address or to group multiple ones. If you often type `my_chat:my-user` you can short it to something like `me` and map it to that address.
 
-The Virtual Address transmitter allows you to create virtual addresses and 
+The Virtual Address transmitter allows you to create virtual addresses, just use the `type` as `virtual` and pass the mappings as the `addresses`:
 
 ```yaml
 transmitters:
