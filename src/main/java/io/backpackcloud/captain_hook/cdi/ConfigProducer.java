@@ -25,7 +25,7 @@
 package io.backpackcloud.captain_hook.cdi;
 
 import io.backpackcloud.captain_hook.CaptainHook;
-import io.backpackcloud.captain_hook.HttpCannon;
+import io.backpackcloud.captain_hook.Cannon;
 import io.backpackcloud.captain_hook.Serializer;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -46,7 +46,8 @@ public class ConfigProducer {
   @Produces
   @Singleton
   // WORKAROUND: declare cannon to force cdi to load it before jackson can inject it on the transmitters as needed
-  public CaptainHook getConfig(Serializer serializer, HttpCannon cannon) {
+  public CaptainHook getConfig(Serializer serializer, Cannon cannon) {
+    serializer.addDependency("cannon", cannon);
     return serializer.yaml().deserialize(new File(configFile), CaptainHook.class);
   }
 

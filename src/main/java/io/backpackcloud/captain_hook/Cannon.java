@@ -24,33 +24,90 @@
 
 package io.backpackcloud.captain_hook;
 
-import io.quarkus.vertx.ConsumeEvent;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import java.util.Collections;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
- * Component responsible for firing notifications using transmitters as powder.
+ * Defines a way of firing payloads that can be based or not on notifications.
+ * <p>
+ * This component is used to abstract HTTP POST interactions.
  */
-@ApplicationScoped
-public class Cannon {
+public interface Cannon {
 
-  private final Map<String, Transmitter> transmitters;
+  /**
+   * Loads the given notification as a context so any String information
+   * (payload attributes, header values and the url) will be able to be
+   * parsed as a template.
+   *
+   * @param notification the notification to be used as context.
+   * @return a new cannon loaded with the given notification.
+   */
+  Cannon load(Notification notification);
 
-  public Cannon(Map<String, Transmitter> transmitters) {
-    this.transmitters = transmitters;
+  /**
+   * Fires the given payload, applying the notification if loaded.
+   *
+   * @param payload the payload to fire
+   * @return a component for selecting the target
+   */
+  default TargetSelector fire(Map<String, ?> payload) {
+    return fire(payload, Collections.emptyMap());
   }
 
-  @Inject
-  public Cannon(CaptainHook captainHook) {
-    this(captainHook.transmitters());
+  /**
+   * Fires the given payload with the specifying headers, applying
+   * the notification if loaded.
+   *
+   * @param payload the payload to fire
+   * @param headers the headers to attach
+   * @return a component for selecting the target
+   */
+  TargetSelector fire(Map<String, ?> payload, Map<String, String> headers);
+
+  /**
+   * Interface for specifying a target for the cannon.
+   */
+  interface TargetSelector {
+
+    /**
+     * Selects the given url as a target for the cannon.
+     *
+     * @param url the target url.
+     * @return the response of the http post.
+     */
+    Response at(String url);
+
   }
 
-  @ConsumeEvent(Plank.NOTIFICATION_WALKED)
-  public void fire(Notification notification) {
-    transmitters.getOrDefault(notification.destination().channel(), n -> {})
-        .fire(notification);
+  /**
+   * Defines a very simplified response of an http interaction.
+   */
+  interface Response {
+
+    /**
+     * Returns the status code of the response.
+     *
+     * @return the status code of the response.
+     */
+    int status();
+
+    /**
+     * Returns the message of the response.
+     *
+     * @return the message of the response.
+     */
+    String message();
+
+    /**
+     * Passes this response to the given consumer.
+     *
+     * @param consumer the consumer to accept this response.
+     */
+    default void then(Consumer<Response> consumer) {
+      consumer.accept(this);
+    }
+
   }
 
 }

@@ -27,7 +27,7 @@ package io.backpackcloud.captain_hook.transmitters.http;
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.backpackcloud.captain_hook.HttpCannon;
+import io.backpackcloud.captain_hook.Cannon;
 import io.backpackcloud.captain_hook.Notification;
 import io.backpackcloud.captain_hook.Transmitter;
 import io.backpackcloud.captain_hook.UnbelievableException;
@@ -46,7 +46,7 @@ public class HTTPTransmitter implements Transmitter {
   private final String url;
   private final Map<String, String> headers;
   private final Map<String, ?> payload;
-  private final HttpCannon httpCannon;
+  private final Cannon cannon;
 
   private boolean error;
 
@@ -54,19 +54,19 @@ public class HTTPTransmitter implements Transmitter {
   public HTTPTransmitter(@JsonProperty("url") String url,
                          @JsonProperty("headers") Map<String, String> headers,
                          @JsonProperty("payload") Map<String, ?> payload,
-                         @JacksonInject("httpCannon") HttpCannon httpCannon) {
+                         @JacksonInject("cannon") Cannon cannon) {
     this.url = url;
     this.headers = Optional.ofNullable(headers)
         .orElseGet(Collections::emptyMap);
     this.payload = Optional.ofNullable(payload)
         .orElseThrow(UnbelievableException.because("Payload definition is required"));
-    this.httpCannon = httpCannon;
+    this.cannon = cannon;
   }
 
   @Override
   public void fire(Notification notification) {
     logger.infov("Sending notification to {0}", notification.target());
-    httpCannon.load(notification)
+    cannon.load(notification)
         .fire(payload, headers)
         .at(url)
         .then(response -> error = response.status() % 500 < 100);

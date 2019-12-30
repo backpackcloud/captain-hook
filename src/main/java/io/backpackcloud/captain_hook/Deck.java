@@ -24,36 +24,38 @@
 
 package io.backpackcloud.captain_hook;
 
-import java.util.Collections;
+import io.quarkus.vertx.ConsumeEvent;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.Map;
-import java.util.function.Consumer;
 
-public interface HttpCannon {
+/**
+ * Component that listens to events happening aboard.
+ */
+@ApplicationScoped
+public class Deck {
 
-  HttpCannon load(Notification notification);
+  private final Map<String, Transmitter> transmitters;
 
-  default Options fire(Map<String, ?> payload) {
-    return fire(payload, Collections.emptyMap());
+  public Deck(Map<String, Transmitter> transmitters) {
+    this.transmitters = transmitters;
   }
 
-  Options fire(Map<String, ?> payload, Map<String, String> headers);
-
-  interface Options {
-
-    Response at(String url);
-
+  @Inject
+  public Deck(CaptainHook captainHook) {
+    this(captainHook.transmitters());
   }
 
-  interface Response {
-
-    int status();
-
-    String message();
-
-    default void then(Consumer<Response> consumer) {
-      consumer.accept(this);
-    }
-
+  /**
+   * Fires notification as soon as they walk the plank.
+   *
+   * @param notification the notification to fire.
+   */
+  @ConsumeEvent(Plank.NOTIFICATION_WALKED)
+  public void fire(Notification notification) {
+    transmitters.getOrDefault(notification.destination().channel(), n -> {})
+        .fire(notification);
   }
 
 }

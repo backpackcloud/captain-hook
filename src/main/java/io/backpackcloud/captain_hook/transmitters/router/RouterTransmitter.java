@@ -27,7 +27,7 @@ package io.backpackcloud.captain_hook.transmitters.router;
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.backpackcloud.captain_hook.HttpCannon;
+import io.backpackcloud.captain_hook.Cannon;
 import io.backpackcloud.captain_hook.Notification;
 import io.backpackcloud.captain_hook.TemplateEngine;
 import io.backpackcloud.captain_hook.Transmitter;
@@ -43,15 +43,15 @@ public class RouterTransmitter implements Transmitter {
 
   private final Map<String, Route> routes;
   private final TemplateEngine templateEngine;
-  private final HttpCannon httpCannon;
+  private final Cannon cannon;
 
   @JsonCreator
   public RouterTransmitter(@JsonProperty("routes") Map<String, Route> routes,
                            @JacksonInject("templateEngine") TemplateEngine templateEngine,
-                           @JacksonInject("httpCannon") HttpCannon httpCannon) {
+                           @JacksonInject("cannon") Cannon cannon) {
     this.routes = routes;
     this.templateEngine = templateEngine;
-    this.httpCannon = httpCannon;
+    this.cannon = cannon;
   }
 
   @Override
@@ -60,7 +60,7 @@ public class RouterTransmitter implements Transmitter {
       Route route = routes.get(notification.target());
 
       logger.infov("Sending notification to: {0}", notification.target());
-      httpCannon.load(notification)
+      cannon.load(notification)
           .fire(route.payload(), route.headers())
           .at(route.url());
     } else {

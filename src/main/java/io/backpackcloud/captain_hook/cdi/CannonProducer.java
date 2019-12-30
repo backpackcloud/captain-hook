@@ -24,7 +24,7 @@
 
 package io.backpackcloud.captain_hook.cdi;
 
-import io.backpackcloud.captain_hook.HttpCannon;
+import io.backpackcloud.captain_hook.Cannon;
 import io.backpackcloud.captain_hook.Notification;
 import io.backpackcloud.captain_hook.Serializer;
 import io.backpackcloud.captain_hook.TemplateEngine;
@@ -37,34 +37,32 @@ import java.util.Collections;
 import java.util.Map;
 
 @ApplicationScoped
-public class HttpCannonProducer {
+public class CannonProducer {
 
   @Produces
-  public HttpCannon get(Serializer serializer, TemplateEngine templateEngine) {
-    HttpCannon httpCannon = new HttpCannonImpl(Collections.emptyMap(), serializer, templateEngine);
-    serializer.addDependency("httpCannon", httpCannon);
-    return httpCannon;
+  public Cannon get(Serializer serializer, TemplateEngine templateEngine) {
+    return new CannonImpl(Collections.emptyMap(), serializer, templateEngine);
   }
 
-  private static class HttpCannonImpl implements HttpCannon {
+  private static class CannonImpl implements Cannon {
 
     private final Map<String, ?> context;
     private final Serializer serializer;
     private final TemplateEngine templateEngine;
 
-    private HttpCannonImpl(Map<String, ?> context, Serializer serializer, TemplateEngine templateEngine) {
+    private CannonImpl(Map<String, ?> context, Serializer serializer, TemplateEngine templateEngine) {
       this.context = context;
       this.serializer = serializer;
       this.templateEngine = templateEngine;
     }
 
     @Override
-    public HttpCannon load(Notification notification) {
-      return new HttpCannonImpl(notification.context(), serializer, templateEngine);
+    public Cannon load(Notification notification) {
+      return new CannonImpl(notification.context(), serializer, templateEngine);
     }
 
     @Override
-    public Options fire(Map<String, ?> payload, Map<String, String> headers) {
+    public TargetSelector fire(Map<String, ?> payload, Map<String, String> headers) {
       return url -> {
         HttpResponse httpResponse = Unirest.post(templateEngine.evaluate(url, context))
             .headers(templateEngine.evaluate(headers, context))
@@ -72,7 +70,7 @@ public class HttpCannonProducer {
             .body(serializer.json().serialize(templateEngine.evaluate(payload, context)))
             .asEmpty();
 
-        return new HttpCannon.Response() {
+        return new Cannon.Response() {
           @Override
           public int status() {
             return httpResponse.getStatus();
