@@ -127,6 +127,7 @@ In case you wanna use the HTTP Transmitter, let Captain know, besides `http` as 
 
 - `url`: the actual url that will receive the notification
 - `headers`: the map containing any additional headers
+- `payload`: the payload definition
 
 ```yaml
 transmitters:
@@ -135,11 +136,13 @@ transmitters:
     url: https://my.endpoint.integration/{destination}
     headers:
       from: captain-hook
+    payload:
+      message: ${message}
 ```
 
 If the `url` contains `{destination}`, it will be replaced by the subscriber's id.
 
-And what about the payload? It's a JSON representation of the `Notification` object.
+Notice that any value can be evaluated as a template, even the headers.
 
 #### Virtual
 
