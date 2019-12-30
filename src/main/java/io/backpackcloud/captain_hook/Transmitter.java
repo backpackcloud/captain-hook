@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.backpackcloud.captain_hook.transmitters.http.HTTPTransmitter;
 import io.backpackcloud.captain_hook.transmitters.pushover.PushoverTransmitter;
+import io.backpackcloud.captain_hook.transmitters.router.RouterTransmitter;
 import io.backpackcloud.captain_hook.transmitters.telegram.TelegramTransmitter;
 import io.backpackcloud.captain_hook.transmitters.virtual.VirtualAddressTransmitter;
 
@@ -39,7 +40,8 @@ import io.backpackcloud.captain_hook.transmitters.virtual.VirtualAddressTransmit
     @JsonSubTypes.Type(value = HTTPTransmitter.class, name = "http"),
     @JsonSubTypes.Type(value = PushoverTransmitter.class, name = "pushover"),
     @JsonSubTypes.Type(value = TelegramTransmitter.class, name = "telegram"),
-    @JsonSubTypes.Type(value = VirtualAddressTransmitter.class, name = "virtual")
+    @JsonSubTypes.Type(value = VirtualAddressTransmitter.class, name = "virtual"),
+    @JsonSubTypes.Type(value = RouterTransmitter.class, name = "router")
 })
 public interface Transmitter {
 
