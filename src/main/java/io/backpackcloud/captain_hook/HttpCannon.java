@@ -22,32 +22,38 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook.cdi;
+package io.backpackcloud.captain_hook;
 
-import io.backpackcloud.captain_hook.CaptainHook;
-import io.backpackcloud.captain_hook.HttpCannon;
-import io.backpackcloud.captain_hook.Serializer;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.Consumer;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-import javax.inject.Singleton;
-import java.io.File;
+public interface HttpCannon {
 
-@ApplicationScoped
-public class ConfigProducer {
+  HttpCannon load(Notification notification);
 
-  private final String configFile;
-
-  public ConfigProducer(@ConfigProperty(name = "config.file", defaultValue = "captain-hook.yml") String configFile) {
-    this.configFile = configFile;
+  default Options fire(Map<String, ?> payload) {
+    return fire(payload, Collections.emptyMap());
   }
 
-  @Produces
-  @Singleton
-  // WORKAROUND: declare cannon to force cdi to load it before jackson can inject it on the transmitters as needed
-  public CaptainHook getConfig(Serializer serializer, HttpCannon cannon) {
-    return serializer.yaml().deserialize(new File(configFile), CaptainHook.class);
+  Options fire(Map<String, ?> payload, Map<String, String> headers);
+
+  interface Options {
+
+    Response at(String url);
+
+  }
+
+  interface Response {
+
+    int status();
+
+    String message();
+
+    default void then(Consumer<Response> consumer) {
+      consumer.accept(this);
+    }
+
   }
 
 }

@@ -25,6 +25,7 @@
 package io.backpackcloud.captain_hook.cdi;
 
 import io.backpackcloud.captain_hook.CaptainHook;
+import io.backpackcloud.captain_hook.HttpCannon;
 import io.backpackcloud.captain_hook.Mapper;
 import io.backpackcloud.captain_hook.Serializer;
 import io.backpackcloud.kodo.Spec;
@@ -48,6 +49,7 @@ public class ConfigProducerTest {
 
   Serializer serializer = mock(Serializer.class, Answers.RETURNS_MOCKS);
   Mapper yamlMapper = mock(Mapper.class, Answers.RETURNS_MOCKS);
+  HttpCannon httpCannon = mock(HttpCannon.class);
 
   @BeforeEach
   void init() {
@@ -58,7 +60,7 @@ public class ConfigProducerTest {
   @Test
   public void test() {
     Spec.given(new ConfigProducer(somePath))
-        .expect(configProducer -> configProducer.getConfig(serializer),
+        .expect(configProducer -> configProducer.getConfig(serializer, httpCannon),
             to().be(captainHook));
   }
 

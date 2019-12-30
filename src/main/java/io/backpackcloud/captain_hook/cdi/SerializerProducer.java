@@ -40,6 +40,7 @@ import io.backpackcloud.captain_hook.UnbelievableException;
 import io.backpackcloud.captain_hook.transmitters.pushover.PushoverService;
 import io.backpackcloud.captain_hook.transmitters.telegram.TelegramService;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
@@ -51,6 +52,8 @@ import java.io.Writer;
 
 @ApplicationScoped
 public class SerializerProducer {
+
+  private static final Logger logger = Logger.getLogger(SerializerProducer.class);
 
   private final ObjectMapper jsonMapper;
   private final ObjectMapper yamlMapper;
@@ -90,11 +93,11 @@ public class SerializerProducer {
                         @RestClient TelegramService telegramService,
                         @RestClient PushoverService pushoverService,
                         Plank plank) {
-    values.addValue("serializer", serializer);
-    values.addValue("templateEngine", templateEngine);
-    values.addValue("telegramService", telegramService);
-    values.addValue("pushoverService", pushoverService);
-    values.addValue("plank", plank);
+    serializer.addDependency("serializer", serializer);
+    serializer.addDependency("templateEngine", templateEngine);
+    serializer.addDependency("telegramService", telegramService);
+    serializer.addDependency("pushoverService", pushoverService);
+    serializer.addDependency("plank", plank);
     return serializer;
   }
 
@@ -115,6 +118,13 @@ public class SerializerProducer {
       return new MapperImpl(xmlMapper);
     }
 
+    @Override
+    public Serializer addDependency(String name, Object dependency) {
+      logger.infov("Adding dependency: {0}", name);
+      values.addValue(name, dependency);
+      return this;
+    }
+
   }
 
   static class MapperImpl implements Mapper {
@@ -131,6 +141,7 @@ public class SerializerProducer {
       try {
         objectMapper.writeValue(writer, object);
       } catch (IOException e) {
+        logger.error("Error on serialize", e);
         throw new UnbelievableException(e);
       }
       return writer.toString();
@@ -141,6 +152,7 @@ public class SerializerProducer {
       try {
         return objectMapper.readValue(input, type);
       } catch (IOException e) {
+        logger.error("Error on deserialize", e);
         throw new UnbelievableException(e);
       }
     }
@@ -150,6 +162,7 @@ public class SerializerProducer {
       try {
         return objectMapper.readValue(file, type);
       } catch (IOException e) {
+        logger.error("Error on deserialize", e);
         throw new UnbelievableException(e);
       }
     }

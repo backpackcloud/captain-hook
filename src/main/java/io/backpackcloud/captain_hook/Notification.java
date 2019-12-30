@@ -148,6 +148,7 @@ public class Notification {
     context.put("url", url);
     context.put("destination", destination);
     context.put("priority", priority);
+    context.put("target", target());
     return context;
   }
 

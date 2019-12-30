@@ -30,6 +30,8 @@ import freemarker.template.Template;
 import io.backpackcloud.captain_hook.TemplateEngine;
 import io.backpackcloud.captain_hook.Transmitter;
 import io.backpackcloud.captain_hook.UnbelievableException;
+import io.backpackcloud.trugger.element.ElementCopy;
+import io.backpackcloud.trugger.element.Elements;
 import org.jboss.logging.Logger;
 
 import javax.enterprise.inject.Produces;
@@ -37,6 +39,8 @@ import javax.inject.Singleton;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TemplateEngineProducer {
 
@@ -49,23 +53,54 @@ public class TemplateEngineProducer {
     cfg.setObjectWrapper(new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_29).build());
     cfg.setClassForTemplateLoading(Transmitter.class, "/io/backpackcloud/captain_hook/transmitters/");
 
-    return (templateString, context) -> {
-      if (templateString == null) return null;
+    return new TemplateEngine() {
+      @Override
+      public String evaluate(String templateString, Map<String, ?> context) {
+        if (templateString == null) return null;
 
-      Template template;
-      Writer out = new StringWriter();
+        Template template;
+        Writer out = new StringWriter();
 
-      try {
-        if (templateString.endsWith(".ftl")) template = cfg.getTemplate(templateString);
-        else template = new Template("template", new StringReader(templateString), cfg);
+        try {
+          if (templateString.endsWith(".ftl")) template = cfg.getTemplate(templateString);
+          else template = new Template("template", new StringReader(templateString), cfg);
 
-        template.process(context, out);
-      } catch (Exception e) {
-        logger.error("Error while processing template", e);
-        throw new UnbelievableException(e);
+          template.process(context, out);
+        } catch (Exception e) {
+          logger.error("Error while processing template", e);
+          throw new UnbelievableException(e);
+        }
+
+        return out.toString();
       }
 
-      return out.toString();
+      @Override
+      public Map evaluate(Map data, Map<String, ?> context) {
+        Map<String, ?> result = new HashMap<>(context.size());
+
+        Elements.copy()
+            .from(data)
+            .notNull()
+            .map(copy -> evalTemplate(copy, context))
+            .to(result);
+
+        return result;
+      }
+
+      private Object evalTemplate(ElementCopy copy, Map<String, ?> context) {
+        if (copy.value() instanceof String) {
+          return evaluate((String) copy.value(), context);
+        } else if (copy.value() instanceof Map) {
+          Map result = new HashMap();
+          Elements.copy()
+              .from(copy.value())
+              .notNull()
+              .map(elementCopy -> evalTemplate(elementCopy, context))
+              .to(result);
+          return result;
+        }
+        return copy.value();
+      }
     };
   }
 

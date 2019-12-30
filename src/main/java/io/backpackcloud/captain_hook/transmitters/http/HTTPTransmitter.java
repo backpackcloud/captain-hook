@@ -27,54 +27,49 @@ package io.backpackcloud.captain_hook.transmitters.http;
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.backpackcloud.captain_hook.HttpCannon;
 import io.backpackcloud.captain_hook.Notification;
-import io.backpackcloud.captain_hook.Serializer;
 import io.backpackcloud.captain_hook.Transmitter;
+import io.backpackcloud.captain_hook.UnbelievableException;
 import io.quarkus.runtime.annotations.RegisterForReflection;
-import kong.unirest.Empty;
-import kong.unirest.HttpRequestWithBody;
-import kong.unirest.HttpResponse;
-import kong.unirest.Unirest;
+import org.jboss.logging.Logger;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 @RegisterForReflection
 public class HTTPTransmitter implements Transmitter {
 
+  private static final Logger logger = Logger.getLogger(HTTPTransmitter.class);
+
   private final String url;
   private final Map<String, String> headers;
-  private final boolean route;
-  private final Serializer serializer;
+  private final Map<String, ?> payload;
+  private final HttpCannon httpCannon;
 
   private boolean error;
 
   @JsonCreator
   public HTTPTransmitter(@JsonProperty("url") String url,
                          @JsonProperty("headers") Map<String, String> headers,
-                         @JacksonInject("serializer") Serializer serializer) {
+                         @JsonProperty("payload") Map<String, ?> payload,
+                         @JacksonInject("httpCannon") HttpCannon httpCannon) {
     this.url = url;
     this.headers = Optional.ofNullable(headers)
         .orElseGet(Collections::emptyMap);
-    this.route = url.contains("{destination}");
-    this.serializer = serializer;
+    this.payload = Optional.ofNullable(payload)
+        .orElseThrow(UnbelievableException.because("Payload definition is required"));
+    this.httpCannon = httpCannon;
   }
 
   @Override
   public void fire(Notification notification) {
-    HttpRequestWithBody post = Unirest.post(url);
-
-    if (route) post.routeParam("destination", notification.destination().id());
-
-    CompletableFuture<HttpResponse<Empty>> future = post.headers(headers)
-        .header("Content-Type", "application/json")
-        .body(serializer.json().serialize(notification))
-        .asEmptyAsync();
-
-    future.whenCompleteAsync(
-        (response, exception) -> error = response.getStatus() % 500 < 100);
+    logger.infov("Sending notification to {0}", notification.target());
+    httpCannon.load(notification)
+        .fire(payload, headers)
+        .at(url)
+        .then(response -> error = response.status() % 500 < 100);
   }
 
   @Override

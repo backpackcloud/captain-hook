@@ -52,6 +52,7 @@
     <kodo.version>4.0.0</kodo.version>
     <freemarker.version>2.3.29</freemarker.version>
     <mockito-core.version>3.2.4</mockito-core.version>
+    <trugger.version>7.0.0</trugger.version>
   </properties>
 
   <dependencyManagement>
@@ -123,6 +124,12 @@
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
       <version>${freemarker.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.backpackcloud</groupId>
+      <artifactId>trugger</artifactId>
+      <version>${trugger.version}</version>
     </dependency>
 
     <dependency>

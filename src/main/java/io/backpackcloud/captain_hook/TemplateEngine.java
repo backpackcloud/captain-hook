@@ -43,4 +43,6 @@ public interface TemplateEngine {
    */
   String evaluate(String template, Map<String, ?> context);
 
+  Map evaluate(Map data, Map<String, ?> context);
+
 }

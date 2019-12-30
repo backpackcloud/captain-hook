@@ -50,4 +50,6 @@ public interface Serializer {
    */
   Mapper xml();
 
+  Serializer addDependency(String name, Object dependency);
+
 }
