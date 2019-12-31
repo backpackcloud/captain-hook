@@ -33,7 +33,7 @@ import kong.unirest.Unirest;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 @ApplicationScoped
@@ -41,46 +41,53 @@ public class CannonProducer {
 
   @Produces
   public Cannon get(Serializer serializer, TemplateEngine templateEngine) {
-    return new CannonImpl(Collections.emptyMap(), serializer, templateEngine);
+    return new CannonImpl(serializer, templateEngine);
   }
 
   private static class CannonImpl implements Cannon {
 
-    private final Map<String, ?> context;
     private final Serializer serializer;
     private final TemplateEngine templateEngine;
 
-    private CannonImpl(Map<String, ?> context, Serializer serializer, TemplateEngine templateEngine) {
-      this.context = context;
+    private CannonImpl(Serializer serializer, TemplateEngine templateEngine) {
       this.serializer = serializer;
       this.templateEngine = templateEngine;
     }
 
     @Override
-    public Cannon load(Notification notification) {
-      return new CannonImpl(notification.context(), serializer, templateEngine);
-    }
+    public LoadedCannon load(Notification notification) {
+      return new LoadedCannon() {
+        Map<String, String> headers = new HashMap<>();
 
-    @Override
-    public TargetSelector fire(Map<String, ?> payload, Map<String, String> headers) {
-      return url -> {
-        HttpResponse httpResponse = Unirest.post(templateEngine.evaluate(url, context))
-            .headers(templateEngine.evaluate(headers, context))
-            .header("Content-Type", "application/json")
-            .body(serializer.json().serialize(templateEngine.evaluate(payload, context)))
-            .asEmpty();
+        @Override
+        public LoadedCannon add(Map<String, String> additionalHeaders) {
+          this.headers.putAll(additionalHeaders);
+          return this;
+        }
 
-        return new Cannon.Response() {
-          @Override
-          public int status() {
-            return httpResponse.getStatus();
-          }
+        @Override
+        public ReadyCannon aimAt(String url) {
+          return payload -> {
+            Map<String, ?> context = notification.context();
+            HttpResponse httpResponse = Unirest.post(templateEngine.evaluate(url, context))
+                .headers(templateEngine.evaluate(headers, context))
+                .header("Content-Type", "application/json")
+                .body(serializer.json().serialize(templateEngine.evaluate(payload, context)))
+                .asEmpty();
 
-          @Override
-          public String message() {
-            return httpResponse.getStatusText();
-          }
-        };
+            return new Cannon.Response() {
+              @Override
+              public int status() {
+                return httpResponse.getStatus();
+              }
+
+              @Override
+              public String message() {
+                return httpResponse.getStatusText();
+              }
+            };
+          };
+        }
       };
     }
 

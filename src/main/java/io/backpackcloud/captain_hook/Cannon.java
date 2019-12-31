@@ -24,7 +24,6 @@
 
 package io.backpackcloud.captain_hook;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -43,40 +42,40 @@ public interface Cannon {
    * @param notification the notification to be used as context.
    * @return a new cannon loaded with the given notification.
    */
-  Cannon load(Notification notification);
+  LoadedCannon load(Notification notification);
 
-  /**
-   * Fires the given payload, applying the notification if loaded.
-   *
-   * @param payload the payload to fire
-   * @return a component for selecting the target
-   */
-  default TargetSelector fire(Map<String, ?> payload) {
-    return fire(payload, Collections.emptyMap());
+  interface LoadedCannon {
+
+    /**
+     * Adds the given http headers.
+     *
+     * @param headers the headers to add
+     * @return this cannon
+     */
+    LoadedCannon add(Map<String, String> headers);
+
+    /**
+     * Sets the url to aim the cannon.
+     *
+     * @param url the url to aim
+     * @return a cannon ready to fire.
+     */
+    ReadyCannon aimAt(String url);
+
   }
 
   /**
-   * Fires the given payload with the specifying headers, applying
-   * the notification if loaded.
-   *
-   * @param payload the payload to fire
-   * @param headers the headers to attach
-   * @return a component for selecting the target
+   * A ready to fire cannon.
    */
-  TargetSelector fire(Map<String, ?> payload, Map<String, String> headers);
-
-  /**
-   * Interface for specifying a target for the cannon.
-   */
-  interface TargetSelector {
+  interface ReadyCannon {
 
     /**
-     * Selects the given url as a target for the cannon.
+     * Fires the given payload.
      *
-     * @param url the target url.
-     * @return the response of the http post.
+     * @param payload the payload to fire
+     * @return the response
      */
-    Response at(String url);
+    Response fire(Map<String, ?> payload);
 
   }
 

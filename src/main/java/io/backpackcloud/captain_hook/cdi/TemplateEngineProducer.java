@@ -24,18 +24,24 @@
 
 package io.backpackcloud.captain_hook.cdi;
 
+import freemarker.cache.ClassTemplateLoader;
+import freemarker.cache.FileTemplateLoader;
+import freemarker.cache.MultiTemplateLoader;
+import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.Template;
 import io.backpackcloud.captain_hook.TemplateEngine;
-import io.backpackcloud.captain_hook.Transmitter;
 import io.backpackcloud.captain_hook.UnbelievableException;
 import io.backpackcloud.trugger.element.ElementCopy;
 import io.backpackcloud.trugger.element.Elements;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
 import javax.enterprise.inject.Produces;
 import javax.inject.Singleton;
+import java.io.File;
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -46,12 +52,28 @@ public class TemplateEngineProducer {
 
   private static final Logger logger = Logger.getLogger(TemplateEngineProducer.class);
 
+  private final String templateFolderLocation;
+
+  public TemplateEngineProducer(@ConfigProperty(name = "templates.dir", defaultValue = "./templates")
+                                    String templateFolderLocation) {
+    this.templateFolderLocation = templateFolderLocation;
+  }
+
   @Produces
   @Singleton
   public TemplateEngine getEngine() {
     Configuration cfg = new Configuration(Configuration.VERSION_2_3_29);
     cfg.setObjectWrapper(new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_29).build());
-    cfg.setClassForTemplateLoading(Transmitter.class, "/io/backpackcloud/captain_hook/transmitters/");
+
+    try {
+      FileTemplateLoader ftl = new FileTemplateLoader(new File(templateFolderLocation));
+      ClassTemplateLoader ctl = new ClassTemplateLoader(getClass(), "/io/backpackcloud/captain_hook/transmitters/");
+
+      cfg.setTemplateLoader(new MultiTemplateLoader(new TemplateLoader[] { ftl, ctl }));
+    } catch (IOException e) {
+      logger.error("Error while configuring template loading", e);
+      throw new UnbelievableException(e);
+    }
 
     return new TemplateEngine() {
       @Override

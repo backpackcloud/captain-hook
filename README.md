@@ -55,6 +55,11 @@ The file can be passed by either:
 - `-Dconfig.file=/path/to/file` JVM parameter
 - `CONFIG_FILE=/path/to/file` environment variable
 
+Also, the template folder can be set by either:
+
+- `-Dtemplates.dir=/path/to/the/directory` JVM parameter
+- `TEMPLATES_DIR=/path/to/the/directory` environment variable
+
 ### Sensitive Parameters
 
 Every sensitive configuration, such as passwords and tokens, can be provided through four ways:
@@ -84,6 +89,10 @@ token:
 
 Why specifying a file? In a Kubernetes/OpenShift environment you might want to use a Secret in order to store sensitive values since Secrets are mounted in a RAM-backed filesystem so the contents are always volatile.
 
+### Templates
+
+Every configuration that accepts a template can be set by either passing the template as is or passing the file that should be loaded. The relative directory is configured by the property `templates.dir`, mentioned in the previous section.
+
 ### Transmitters
 
 #### Transmitter Type
@@ -105,7 +114,7 @@ transmitters:
       ${(url)!}
 ```
 
-The variables that can be used in the template are: `title`, `message`, `url`, `destination` and `priority`. All related to the notification.
+All notification attributes can be used as variables.
  
 #### Pushover
 

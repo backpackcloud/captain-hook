@@ -61,8 +61,9 @@ public class RouterTransmitter implements Transmitter {
 
       logger.infov("Sending notification to: {0}", notification.target());
       cannon.load(notification)
-          .fire(route.payload(), route.headers())
-          .at(route.url());
+          .add(route.headers())
+          .aimAt(route.url())
+          .fire(route.payload());
     } else {
       logger.warnv("No route defined for {0}", notification.target());
     }

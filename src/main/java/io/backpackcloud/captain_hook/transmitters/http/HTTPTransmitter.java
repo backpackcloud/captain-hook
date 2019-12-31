@@ -67,8 +67,9 @@ public class HTTPTransmitter implements Transmitter {
   public void fire(Notification notification) {
     logger.infov("Sending notification to {0}", notification.target());
     cannon.load(notification)
-        .fire(payload, headers)
-        .at(url)
+        .add(headers)
+        .aimAt(url)
+        .fire(payload)
         .then(response -> error = response.status() % 500 < 100);
   }
 
