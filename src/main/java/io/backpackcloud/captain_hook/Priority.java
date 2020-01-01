@@ -24,12 +24,13 @@
 
 package io.backpackcloud.captain_hook;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public enum Priority {
 
-  LOW(-1), NORMAL(0), HIGH(1);
+  @JsonProperty("low") LOW(-1),
+  @JsonProperty("normal") NORMAL(0),
+  @JsonProperty("high") HIGH(1);
 
   private final int value;
 
@@ -39,17 +40,6 @@ public enum Priority {
 
   public int value() {
     return value;
-  }
-
-  @JsonValue
-  @Override
-  public String toString() {
-    return name().toLowerCase();
-  }
-
-  @JsonCreator
-  public static Priority get(String priority) {
-    return Priority.valueOf(priority.toUpperCase());
   }
 
 }

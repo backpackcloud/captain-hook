@@ -29,7 +29,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.backpackcloud.captain_hook.Cannon;
 import io.backpackcloud.captain_hook.Notification;
-import io.backpackcloud.captain_hook.TemplateEngine;
 import io.backpackcloud.captain_hook.Transmitter;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import org.jboss.logging.Logger;
@@ -42,15 +41,12 @@ public class RouterTransmitter implements Transmitter {
   private static final Logger logger = Logger.getLogger(RouterTransmitter.class);
 
   private final Map<String, Route> routes;
-  private final TemplateEngine templateEngine;
   private final Cannon cannon;
 
   @JsonCreator
   public RouterTransmitter(@JsonProperty("routes") Map<String, Route> routes,
-                           @JacksonInject("templateEngine") TemplateEngine templateEngine,
                            @JacksonInject("cannon") Cannon cannon) {
     this.routes = routes;
-    this.templateEngine = templateEngine;
     this.cannon = cannon;
   }
 

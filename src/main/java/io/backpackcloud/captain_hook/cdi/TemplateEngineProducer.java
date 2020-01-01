@@ -54,7 +54,7 @@ public class TemplateEngineProducer {
 
   private final String templateFolderLocation;
 
-  public TemplateEngineProducer(@ConfigProperty(name = "templates.dir", defaultValue = "./templates")
+  public TemplateEngineProducer(@ConfigProperty(name = "templates.dir", defaultValue = "./")
                                     String templateFolderLocation) {
     this.templateFolderLocation = templateFolderLocation;
   }
