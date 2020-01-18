@@ -1,18 +1,18 @@
-# Captain Hook - Walking Notifications With Style
+# Captain Hook
 
-Notifications are the best way to raise awareness to people. Unfortunately, platforms often allow us to receive notifications only through email, while we now have tons of ways to receive a notification.
-
-On the other side, webhooks became the common sense when it comes to create awareness. Basically everything supports webhooks now so you can plug your endpoint and be aware of something. It's a very nice (and cheap) way of exposing integration functionality.
-
-Yes! You got it right! Captain Hook is responsible for connecting a webhook to your notification platform of choice.
+Captain Hook is a tool for sending notifications based on webhooks. You connect an application with it, maps how the webhooks will produce the notifications and Captain Hook will deliver a notification when a webhook arrives.
 
 ## How To Build
 
 This is a 100% Java application so you can just do the idiomatic `mvn package`.
 
+## How To Run
+
+TODO
+
 ## How It Works
 
-Captain Hook is tough but allows three different ways of delivering a notification:
+Captain Hook allows three different ways of delivering a notification:
 
 - by taking a webhook and producing events that can be subscribed for delivering notifications
 - by taking an event and deliver notifications to its subscribers
@@ -46,7 +46,6 @@ For example, the address `my_chat:some-user` will be reached by a Transmitter re
 Captain Hook expects a yaml file containing:
 
 - transmitters
-- virtual addresses
 - event subscriptions
 - webhook mappings
 
@@ -54,11 +53,6 @@ The file can be passed by either:
 
 - `-Dconfig.file=/path/to/file` JVM parameter
 - `CONFIG_FILE=/path/to/file` environment variable
-
-Also, the template folder can be set by either:
-
-- `-Dtemplates.dir=/path/to/the/directory` JVM parameter
-- `TEMPLATES_DIR=/path/to/the/directory` environment variable
 
 ### Sensitive Parameters
 
@@ -91,17 +85,33 @@ Why specifying a file? In a Kubernetes/OpenShift environment you might want to u
 
 ### Templates
 
-Every configuration that accepts a template can be set by either passing the template as is or passing the file that should be loaded. The relative directory is configured by the property `templates.dir`, mentioned in the previous section.
+Every configuration that accepts a template can be set by either passing the template as is or passing the file that should be loaded. The relative directory is configured by the property `templates.dir` which can be set by either:
+
+- `-Dtemplates.dir=/path/to/the/directory` JVM parameter
+- `TEMPLATES_DIR=/path/to/the/directory` environment variable
+
+### Selectors
+
+Selectors allow you to filter webhooks and events based on a set of labels attached to them. Currently a selector can be created by supplying the labels you need to filter and the value that should be or not present:
+
+- To specify the value, pass it as is
+```foo: bar```
+- To specify the label should hold a value, pass a `*`
+```foo: *```
+- To specify the label should not hold a value, pass a `!`
+```foo: !```
+- To specify multiple allowed values for a label, separate them with a `|`
+```foo: bar|baz```
 
 ### Transmitters
 
 #### Transmitter Type
 
-Back to the common Transmitter configuration, every configuration must include the key `type` so the Captain can pass the right command to the crew. You can have as much as Transmitters you need as long as they have different names. The only name restriction is `virtual` which is used internally to represent a virtual address (more on that later) and thus should not be used to create a Transmitter.
+Back to the common Transmitter configuration, every configuration must include the key `type` so the Captain can pass the right command to the crew. You can have as much as Transmitters you need as long as they have different names.
 
 #### Telegram
 
-Telegram Bots are a nice way to deliver notifications, you can create a bot and have a token in less than one minute. All the Captain needs is `telegram` as `type`, a sensitive input as `token` and, optionally, a Freemarker template for how to structure the message.
+Telegram Bots are a nice way to deliver notifications, you can create a bot and have a token in less than one minute. All you need is `telegram` as `type`, a sensitive input as `token` and, optionally, a Freemarker template for how to structure the message.
 
 ```yaml
 transmitters:
@@ -118,7 +128,7 @@ All notification attributes can be used as variables.
  
 #### Pushover
 
-Pushover is a notification service available for almost every platform. Captain knows how incredible it is and it's nice enough to support it. All the Captain needs is `pushover` as `type` and a sensitive input as `token`.
+Pushover is a notification service available for almost every platform. All you need is `pushover` as `type` and a sensitive input as `token`.
 
 ```yaml
 transmitters:
@@ -131,7 +141,7 @@ transmitters:
 
 #### HTTP
 
-You can also uses a generic http call to forward the notification. What's the catch here? The payload is not customizable. Remember: Captain only cares about delivering notifications, integration between systems is not the focus on this ship.
+You can also uses a generic http call to forward the notification. Remember, Captain Hook only cares about delivering notifications, integration between systems is not the focus on this ship.
 
 In case you wanna use the HTTP Transmitter, let Captain know, besides `http` as `type`:
 
@@ -218,7 +228,7 @@ transmitters:
       - virtual:my_telegram
 ```
 
-### The Default Transmitter
+#### Creating a Default Transmitter
 
 If you create a transmitter named `default`, it will be used to handle addresses without specifying the channel. So when you subscribe the address `my_team` it will be converted to `default:my_team` and the `default` transmitter will be used.
 
@@ -243,7 +253,7 @@ subscriptions:
 
 ### Webhook Mappings
 
-To configure the webhooks, you need to inform how the payload will be converted into an event. The crew allows you to define the values using a Freemarker template. This is the structure of a webhook mapping:
+To configure the webhooks, you need to inform how the payload will be converted into an event. This is the structure of a webhook mapping:
 
 ```yaml
 webhooks:
@@ -267,7 +277,7 @@ The `selector` will be used to check if the webhook should be processed by this 
 
 #### Webhook Examples
 
-Bellow are some examples of how to use Captain Hook with known tools for leverage notifications.
+Bellow are some examples of how to use Captain Hook with known tools to leverage their notification capabilities.
 
 ##### Gitlab
 

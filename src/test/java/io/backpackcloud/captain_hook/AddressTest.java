@@ -22,43 +22,30 @@
  * SOFTWARE.
  */
 
-package io.backpackcloud.captain_hook.cdi;
+package io.backpackcloud.captain_hook;
 
-import io.backpackcloud.captain_hook.Cannon;
-import io.backpackcloud.captain_hook.CaptainHook;
-import io.backpackcloud.captain_hook.Mapper;
-import io.backpackcloud.captain_hook.Serializer;
-import org.junit.jupiter.api.BeforeEach;
+import io.backpackcloud.spectaculous.Spec;
 import org.junit.jupiter.api.Test;
-import org.mockito.Answers;
 
-import java.io.File;
-import java.util.Collections;
-
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-public class ConfigProducerTest {
-
-  String somePath = "/some/path";
-  CaptainHook captainHook = new CaptainHook(
-      Collections.emptyList(), Collections.emptyList(), Collections.emptyMap()
-  );
-
-  Serializer serializer = mock(Serializer.class, Answers.RETURNS_MOCKS);
-  Mapper yamlMapper = mock(Mapper.class, Answers.RETURNS_MOCKS);
-  Cannon cannon = mock(Cannon.class);
-
-  @BeforeEach
-  void init() {
-    when(serializer.yaml()).thenReturn(yamlMapper);
-    when(yamlMapper.deserialize(new File(somePath), CaptainHook.class)).thenReturn(captainHook);
-  }
+public class AddressTest {
 
   @Test
   public void test() {
-    assertSame(captainHook, new ConfigProducer(somePath).getConfig(serializer, cannon));
+    Spec.describe(Address.class)
+
+        .given(Address.fromString("bar"))
+        .because("The default channel should be assigned if not provided")
+        .expect("default").from(Address::channel)
+        .expect("bar").from(Address::id)
+
+        .given(Address.fromString("foo:bar"))
+        .because("The pattern channel:id should be used to parse the address")
+        .expect("foo").from(Address::channel)
+        .expect("bar").from(Address::id)
+
+        .because("Addresses from string should have at least an ID")
+        .expect(UnbelievableException.class).when(() -> Address.fromString(""))
+        .expect(UnbelievableException.class).when(() -> Address.fromString(null));
   }
 
 }

@@ -72,6 +72,15 @@ public class LabelSet {
   }
 
   /**
+   * Returns the size of this label set.
+   *
+   * @return the size of this label set.
+   */
+  public int size() {
+    return this.values.size();
+  }
+
+  /**
    * Creates a new map containing this data.
    *
    * @return a new map containing this data.

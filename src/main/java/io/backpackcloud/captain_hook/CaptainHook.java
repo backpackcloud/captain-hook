@@ -28,7 +28,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -52,9 +54,9 @@ public class CaptainHook {
   public CaptainHook(@JsonProperty("subscriptions") List<Subscription> subscriptions,
                      @JsonProperty("webhooks") List<WebhookMapping> webhooks,
                      @JsonProperty("transmitters") Map<String, Transmitter> transmitters) {
-    this.subscriptions = subscriptions;
-    this.webhooks = webhooks;
-    this.transmitters = transmitters;
+    this.subscriptions = new ArrayList<>(subscriptions);
+    this.webhooks = new ArrayList<>(webhooks);
+    this.transmitters = new HashMap<>(transmitters);
   }
 
   public List<Subscription> subscriptions() {

@@ -49,7 +49,7 @@
     <quarkus.platform.version>1.0.0.Final</quarkus.platform.version>
 
     <unirest-java.version>3.3.00</unirest-java.version>
-    <kodo.version>4.0.0</kodo.version>
+    <spectaculous.version>0.1.1</spectaculous.version>
     <freemarker.version>2.3.29</freemarker.version>
     <mockito-core.version>3.2.4</mockito-core.version>
     <trugger.version>7.0.0</trugger.version>
@@ -146,8 +146,8 @@
 
     <dependency>
       <groupId>io.backpackcloud</groupId>
-      <artifactId>kodo</artifactId>
-      <version>${kodo.version}</version>
+      <artifactId>spectaculous</artifactId>
+      <version>${spectaculous.version}</version>
       <scope>test</scope>
     </dependency>
 
