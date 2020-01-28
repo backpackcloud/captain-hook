@@ -1,0 +1,26 @@
+stages:
+  - package
+  - build
+
+mvn:package:
+  image: docker-registry.default.svc:5000/backpackcloud/maven
+  stage: package
+  artifacts:
+    paths:
+      - target/*
+  script:
+    - build
+
+docker:build:
+  image: docker-registry.default.svc:5000/backpackcloud/docker
+  stage: build
+  variables:
+    DOCKERFILE: src/main/docker/Dockerfile.jvm
+  script:
+    - build
+    - push
+  dependencies:
+    - mvn:package
+  only:
+    - tags
+    - develop
