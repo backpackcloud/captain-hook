@@ -62,6 +62,7 @@ public class UnirestCannon implements Cannon {
           HttpResponse httpResponse = Unirest.post(templateEngine.evaluate(url, context))
                                              .headers(templateEngine.evaluate(headers, context))
                                              .header("Content-Type", "application/json")
+                                             .header("user-agent", "captain-hook")
                                              .body(serializer.json().serialize(templateEngine.evaluate(payload, context)))
                                              .asEmpty();
 
