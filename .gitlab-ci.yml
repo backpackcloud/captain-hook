@@ -16,6 +16,7 @@ docker:build:
   stage: build
   variables:
     DOCKERFILE: src/main/docker/Dockerfile.jvm
+    IMAGE_TAG: latest
   script:
     - build
     - push
