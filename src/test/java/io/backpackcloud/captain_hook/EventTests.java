@@ -24,37 +24,19 @@
 
 package io.backpackcloud.captain_hook;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.quarkus.runtime.annotations.RegisterForReflection;
+import io.backpackcloud.spectaculous.Spec;
+import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
+public class EventTests {
 
-@RegisterForReflection
-public class WebhookMapping {
-
-  private final Selector selector;
-  private final Event event;
-
-  @JsonCreator
-  public WebhookMapping(@JsonProperty("selector") Selector selector,
-                        @JsonProperty("event") Event event) {
-    this.selector = Optional.ofNullable(selector).orElseGet(Selector::empty);
-    this.event = Optional.ofNullable(event)
-        .orElseThrow(UnbelievableException
-            .because("Cannot create a webhook mapping without an event definition"));
-  }
-
-  public boolean matches(Webhook webhook) {
-    return selector.test(webhook.labels());
-  }
-
-  public Selector selector() {
-    return selector;
-  }
-
-  public Event event() {
-    return event;
+  @Test
+  public void test() {
+    Spec.describe(Event.class)
+        .because("Events must have at least a name and a message")
+        .expect(UnbelievableException.class).when(() -> new Event(LabelSet.empty(), null, null, null, null))
+        .expect(UnbelievableException.class).when(() -> new Event(LabelSet.empty(), "a name", null, null, null))
+        .expect(UnbelievableException.class).when(() -> new Event(LabelSet.empty(), null, "a message", null, null))
+        .then(() -> new Event(LabelSet.empty(), "the name", "the message", null, null));
   }
 
 }

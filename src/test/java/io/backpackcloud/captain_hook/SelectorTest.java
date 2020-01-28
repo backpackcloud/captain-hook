@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 Marcelo Guimaraes
+ * Copyright (c) 2019 Marcelo Guimarães <ataxexe@backpackcloud.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
 
 package io.backpackcloud.captain_hook;
 
+import io.backpackcloud.spectaculous.Operation;
 import io.backpackcloud.spectaculous.Spec;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +32,6 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -40,7 +40,7 @@ import static org.mockito.Mockito.when;
 
 public class SelectorTest {
 
-  Function<Selector, Boolean> test(LabelSet labelSet) {
+  Operation<Selector, Boolean> test(LabelSet labelSet) {
     return selector -> selector.test(labelSet);
   }
 

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 Marcelo Guimaraes
+ * Copyright (c) 2019 Marcelo Guimarães <ataxexe@backpackcloud.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -67,6 +67,7 @@ public class SerializerProducer {
 
     jsonMapper = new ObjectMapper();
     jsonMapper.registerModules(new Jdk8Module(), new JavaTimeModule(), new ParameterNamesModule());
+    jsonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     jsonMapper.setInjectableValues(values);
 
     yamlMapper = new ObjectMapper(new YAMLFactory());

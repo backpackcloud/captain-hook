@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 Marcelo Guimaraes
+ * Copyright (c) 2019 Marcelo Guimarães <ataxexe@backpackcloud.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,72 +25,19 @@
 package io.backpackcloud.captain_hook.cdi;
 
 import io.backpackcloud.captain_hook.Cannon;
-import io.backpackcloud.captain_hook.Notification;
 import io.backpackcloud.captain_hook.Serializer;
 import io.backpackcloud.captain_hook.TemplateEngine;
-import kong.unirest.HttpResponse;
-import kong.unirest.Unirest;
+import io.backpackcloud.captain_hook.impl.UnirestCannon;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
-import java.util.HashMap;
-import java.util.Map;
 
 @ApplicationScoped
 public class CannonProducer {
 
   @Produces
   public Cannon get(Serializer serializer, TemplateEngine templateEngine) {
-    return new CannonImpl(serializer, templateEngine);
-  }
-
-  private static class CannonImpl implements Cannon {
-
-    private final Serializer serializer;
-    private final TemplateEngine templateEngine;
-
-    private CannonImpl(Serializer serializer, TemplateEngine templateEngine) {
-      this.serializer = serializer;
-      this.templateEngine = templateEngine;
-    }
-
-    @Override
-    public LoadedCannon load(Notification notification) {
-      return new LoadedCannon() {
-        Map<String, String> headers = new HashMap<>();
-
-        @Override
-        public LoadedCannon add(Map<String, String> additionalHeaders) {
-          this.headers.putAll(additionalHeaders);
-          return this;
-        }
-
-        @Override
-        public ReadyCannon aimAt(String url) {
-          return payload -> {
-            Map<String, ?> context = notification.context();
-            HttpResponse httpResponse = Unirest.post(templateEngine.evaluate(url, context))
-                .headers(templateEngine.evaluate(headers, context))
-                .header("Content-Type", "application/json")
-                .body(serializer.json().serialize(templateEngine.evaluate(payload, context)))
-                .asEmpty();
-
-            return new Cannon.Response() {
-              @Override
-              public int status() {
-                return httpResponse.getStatus();
-              }
-
-              @Override
-              public String message() {
-                return httpResponse.getStatusText();
-              }
-            };
-          };
-        }
-      };
-    }
-
+    return new UnirestCannon(serializer, templateEngine);
   }
 
 }

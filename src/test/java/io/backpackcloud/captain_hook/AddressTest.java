@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019 Marcelo Guimaraes
+ * Copyright (c) 2019 Marcelo Guimarães <ataxexe@backpackcloud.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,9 @@ public class AddressTest {
   @Test
   public void test() {
     Spec.describe(Address.class)
+        .because("Addresses from string should have at least an ID")
+        .then(() -> Address.fromString("")).willFail()
+        .then(() -> Address.fromString(null)).willFail()
 
         .given(Address.fromString("bar"))
         .because("The default channel should be assigned if not provided")
@@ -41,11 +44,7 @@ public class AddressTest {
         .given(Address.fromString("foo:bar"))
         .because("The pattern channel:id should be used to parse the address")
         .expect("foo").from(Address::channel)
-        .expect("bar").from(Address::id)
-
-        .because("Addresses from string should have at least an ID")
-        .expect(UnbelievableException.class).when(() -> Address.fromString(""))
-        .expect(UnbelievableException.class).when(() -> Address.fromString(null));
+        .expect("bar").from(Address::id);
   }
 
 }
