@@ -2,7 +2,7 @@
 <!--
   ~ The MIT License (MIT)
   ~
-  ~ Copyright (c) 2019 Marcelo Guimaraes
+  ~ Copyright (c) 2019 Marcelo Guimarães <ataxexe@backpackcloud.com>
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy
   ~ of this software and associated documentation files (the "Software"), to deal
@@ -43,13 +43,10 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <surefire-plugin.version>2.22.1</surefire-plugin.version>
 
-    <quarkus-plugin.version>1.0.1.Final</quarkus-plugin.version>
-    <quarkus.platform.artifact-id>quarkus-universe-bom</quarkus.platform.artifact-id>
-    <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-    <quarkus.platform.version>1.0.0.Final</quarkus.platform.version>
+    <quarkus.version>1.2.0.Final</quarkus.version>
 
     <unirest-java.version>3.3.00</unirest-java.version>
-    <spectaculous.version>0.1.1</spectaculous.version>
+    <spectaculous.version>0.2.0-SNAPSHOT</spectaculous.version>
     <freemarker.version>2.3.29</freemarker.version>
     <mockito-core.version>3.2.4</mockito-core.version>
     <trugger.version>7.0.0</trugger.version>
@@ -58,9 +55,9 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>${quarkus.platform.group-id}</groupId>
-        <artifactId>${quarkus.platform.artifact-id}</artifactId>
-        <version>${quarkus.platform.version}</version>
+        <groupId>io.quarkus</groupId>
+        <artifactId>quarkus-universe-bom</artifactId>
+        <version>${quarkus.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -164,7 +161,7 @@
       <plugin>
         <groupId>io.quarkus</groupId>
         <artifactId>quarkus-maven-plugin</artifactId>
-        <version>${quarkus-plugin.version}</version>
+        <version>${quarkus.version}</version>
         <executions>
           <execution>
             <goals>
