@@ -1,6 +1,10 @@
 stages:
   - package
   - build
+  - rollout
+
+variables:
+  VERSION_FILE: target/version
 
 mvn:package:
   image: docker-registry.default.svc:5000/backpackcloud/maven
@@ -10,18 +14,26 @@ mvn:package:
       - target/*
   script:
     - build
+  only:
+    - develop
 
 docker:build:
   image: docker-registry.default.svc:5000/backpackcloud/docker
   stage: build
   variables:
     DOCKERFILE: src/main/docker/Dockerfile.jvm
-    VERSION_FILE: target/version
   script:
     - build
     - push
   dependencies:
     - mvn:package
   only:
-    - tags
+    - develop
+
+openshift:tag:
+  image: docker-registry.default.svc:5000/backpackcloud/oc2w3
+  stage: rollout
+  script:
+    - tag latest
+  only:
     - develop
