@@ -31,7 +31,7 @@ docker:build:
     - develop
 
 openshift:tag:
-  image: docker-registry.default.svc:5000/backpackcloud/oc2w3
+  image: docker-registry.default.svc:5000/backpackcloud/oc
   stage: rollout
   script:
     - tag latest
