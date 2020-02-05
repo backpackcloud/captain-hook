@@ -31,11 +31,16 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public class GeneralExceptionMapper implements ExceptionMapper<UnbelievableException> {
+public class UnbelievableExceptionMapper implements ExceptionMapper<UnbelievableException> {
 
   @Override
   public Response toResponse(UnbelievableException exception) {
-    return Response.status(400).entity(exception.getMessage()).build();
+    int status;
+
+    if (exception.getCause() == null) status = 400;
+    else status = 500;
+
+    return Response.status(status).entity(exception.getMessage()).build();
   }
 
 }

@@ -32,7 +32,7 @@ import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.Template;
 import io.backpackcloud.captain_hook.TemplateEngine;
-import io.backpackcloud.captain_hook.UnbelievableException;
+import io.backpackcloud.captain_hook.TemplateException;
 import io.backpackcloud.trugger.element.ElementCopy;
 import io.backpackcloud.trugger.element.Elements;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -72,7 +72,7 @@ public class TemplateEngineProducer {
       cfg.setTemplateLoader(new MultiTemplateLoader(new TemplateLoader[] { ftl, ctl }));
     } catch (IOException e) {
       logger.error("Error while configuring template loading", e);
-      throw new UnbelievableException(e);
+      throw new TemplateException(e);
     }
 
     return new TemplateEngine() {
@@ -90,7 +90,7 @@ public class TemplateEngineProducer {
           template.process(context, out);
         } catch (Exception e) {
           logger.error("Error while processing template", e);
-          throw new UnbelievableException(e);
+          throw new TemplateException(e);
         }
 
         return out.toString();
