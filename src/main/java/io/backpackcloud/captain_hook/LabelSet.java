@@ -48,7 +48,7 @@ public class LabelSet {
 
   @JsonCreator
   public LabelSet(Map<String, String> values) {
-    this.values = values;
+    this.values = Optional.ofNullable(values).orElseGet(Collections::emptyMap);
   }
 
   /**

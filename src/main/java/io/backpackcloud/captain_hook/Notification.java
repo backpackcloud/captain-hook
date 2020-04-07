@@ -24,6 +24,7 @@
 
 package io.backpackcloud.captain_hook;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
@@ -56,7 +57,13 @@ public class Notification {
   @JsonProperty
   private final LabelSet labels;
 
-  public Notification(String title, String message, String url, Address destination, Priority priority, LabelSet labels) {
+  @JsonCreator
+  public Notification(@JsonProperty("title") String title,
+                      @JsonProperty("message") String message,
+                      @JsonProperty("url") String url,
+                      @JsonProperty("destination") Address destination,
+                      @JsonProperty("priority") Priority priority,
+                      @JsonProperty("labels") LabelSet labels) {
     this.title = title;
     this.message = Optional.ofNullable(message)
         .orElseThrow(UnbelievableException.because("Cannot create a notification without a message"));
@@ -64,7 +71,7 @@ public class Notification {
     this.destination = Optional.ofNullable(destination)
         .orElseThrow(UnbelievableException.because("Cannot create a notification without a destination"));
     this.priority = Optional.ofNullable(priority).orElse(Priority.NORMAL);
-    this.labels = labels;
+    this.labels = Optional.ofNullable(labels).orElseGet(LabelSet::empty);
   }
 
   public Notification(Event event, Address destination, Priority priority) {

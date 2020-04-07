@@ -31,6 +31,7 @@ import io.backpackcloud.captain_hook.Notification;
 import io.backpackcloud.captain_hook.SensitiveValue;
 import io.backpackcloud.captain_hook.TemplateEngine;
 import io.backpackcloud.captain_hook.Transmitter;
+import io.backpackcloud.captain_hook.UnbelievableException;
 import org.jboss.logging.Logger;
 
 import javax.ws.rs.WebApplicationException;
@@ -59,14 +60,15 @@ public class TelegramTransmitter implements Transmitter {
   @Override
   public void fire(Notification notification) {
     logger.infov("Sending message to {0}", notification.target());
-    TelegramMessage message = new TelegramMessage(
-        notification.target(),
-        templateEngine.evaluate(template, notification.context())
-    );
     try {
+      String content = templateEngine.evaluate(template, notification.context());
+      TelegramMessage message = new TelegramMessage(notification.target(), content);
       telegramService.send(token, message);
     } catch (WebApplicationException e) {
       logger.errorv(e, "Got HTTP Status {0} while sending pushover notification", e.getResponse().getStatus());
+    } catch (Exception e) {
+      logger.error("Error while processing template", e);
+      throw new UnbelievableException(e);
     }
   }
 
