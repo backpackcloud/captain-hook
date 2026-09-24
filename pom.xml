@@ -47,7 +47,7 @@
 
     <unirest-java.version>3.3.00</unirest-java.version>
     <spectaculous.version>0.2.0-SNAPSHOT</spectaculous.version>
-    <freemarker.version>2.3.29</freemarker.version>
+    <freemarker.version>2.3.35</freemarker.version>
     <mockito-core.version>3.2.4</mockito-core.version>
     <trugger.version>7.0.0</trugger.version>
   </properties>
